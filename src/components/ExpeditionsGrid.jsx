@@ -285,7 +285,6 @@ export default function ExpeditionsGrid({ expeditions, navigate }) {
   }, []);
 
   const upcoming = expeditions
-    .filter(e => new Date(e.start_date) > new Date())
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
   // Group by year and month
