@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Alumni+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ── PALETA OFICIAL JT ──────────────────────────────────────────
+   #9bc8a9  Verde menta
+   #004140  Verde escuro / teal
+   #12415c  Azul marinho
+   #dab83f  Dourado
+   Tipografia primária:  Alumni Sans (italic family)
+   Tipografia secundária: The Historia (brush script)
+──────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Background */
+  --jt-bg:         #06111a;
+  --jt-bg-2:       #080d18;
+  --jt-bg-card:    rgba(8, 13, 24, 0.6);
+  --jt-border:     rgba(155, 200, 169, 0.1);
+  --jt-border-2:   rgba(155, 200, 169, 0.2);
+
+  /* Textos */
+  --jt-text:       #f1f5f9;
+  --jt-text-muted: rgba(241, 245, 249, 0.6);
+
+  /* Cores da marca */
+  --jt-teal:       #004140;
+  --jt-navy:       #12415c;
+  --jt-mint:       #9bc8a9;
+  --jt-gold:       #dab83f;
+  --jt-gold-light: #e8ca6a;
+  --jt-gold-dark:  #b8952e;
+
+  /* Gradientes */
+  --jt-grad-gold:  linear-gradient(135deg, #dab83f, #e8ca6a);
+  --jt-grad-teal:  linear-gradient(135deg, #004140, #12415c);
+  --jt-grad-full:  linear-gradient(135deg, #004140, #12415c, #dab83f);
+
+  /* Texto */
+  --jt-text:   #0f172a;
+  --jt-muted:  rgba(15, 23, 42, 0.65);
+
+  /* Tipografia */
+  --jt-font-head:   'Alumni Sans', sans-serif;
+  --jt-font-body:   'Inter', sans-serif;
+  --jt-font-script: 'The Historia', cursive; /* carregada localmente */
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--jt-bg);
+    color: var(--jt-text);
+    font-family: var(--jt-font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ── ANIMATIONS ─────────────────────────────────────────────── */
+@keyframes kenburns {
+  0%   { transform: scale(1.08) translate(0%, 0%); }
+  25%  { transform: scale(1.16) translate(-1%, -1%); }
+  50%  { transform: scale(1.12) translate(1%, 0.5%); }
+  75%  { transform: scale(1.18) translate(-0.5%, 1%); }
+  100% { transform: scale(1.08) translate(0%, 0%); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(218, 184, 63, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(218, 184, 63, 0); }
+}
+
+/* ── UTILITY CLASSES ────────────────────────────────────────── */
+.kenburns    { animation: kenburns 22s ease-in-out infinite; }
+.fade-up     { animation: fadeUp 0.7s ease-out both; }
+.fade-in     { animation: fadeIn 0.5s ease-out both; }
+
+/* Texto em gradiente dourado */
+.jt-grad-text {
+  background: var(--jt-grad-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Texto em gradiente teal */
+.jt-teal-text {
+  background: var(--jt-grad-teal);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glassmorphism com tint teal/navy */
+.jt-glass {
+  background: var(--jt-bg-card);
+  border: 1px solid var(--jt-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Botão principal — dourado */
+.jt-btn-primary {
+  background: var(--jt-grad-gold);
+  color: #06111a;
+  font-family: var(--jt-font-body);
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+.jt-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(218, 184, 63, 0.45);
+}
+.jt-btn-primary:active { transform: translateY(0); opacity: 0.9; }
+
+/* Botão ghost — borda teal */
+.jt-btn-ghost {
+  background: transparent;
+  color: var(--jt-text);
+  border: 1px solid rgba(155, 200, 169, 0.3);
+  font-family: var(--jt-font-body);
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.jt-btn-ghost:hover {
+  background: rgba(155, 200, 169, 0.08);
+  border-color: rgba(155, 200, 169, 0.55);
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Títulos de Seção Padronizados */
+.section-title {
+  font-family: var(--jt-font-head);
+  font-style: italic;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #f1f5f9;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  margin: 0 0 16px;
+}
+
+/* Shimmer loading */
+.shimmer-bg {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.03) 25%,
+    rgba(155,200,169,0.07) 50%,
+    rgba(255,255,255,0.03) 75%);
+  background-size: 200% auto;
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* Scrollbar com tint da marca */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--jt-bg); }
+::-webkit-scrollbar-thumb { background: rgba(0,65,64,0.6); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,65,64,0.9); }
