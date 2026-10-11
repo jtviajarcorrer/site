@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useT } from '../content/SiteTexts.jsx';
 
 const InstagramIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -10,13 +11,14 @@ const InstagramIcon = () => (
 );
 
 const NAV_LINKS = [
-  { label: 'Quem Somos',    href: '#sobre' },
-  { label: 'Expedições',    href: '#expedicoes' },
-  { label: 'Como Funciona', href: '#como-funciona' },
-  { label: 'Contato',       href: '#contato' },
+  { key: 'menu_quem_somos',    href: '#sobre' },
+  { key: 'menu_expedicoes',    href: '#expedicoes' },
+  { key: 'menu_como_funciona', href: '#como-funciona' },
+  { key: 'menu_contato',       href: '#contato' },
 ];
 
-export default function Navbar({ navigate }) {
+export default function Navbar({ navigate, logoAlwaysVisible = false }) {
+  const { t } = useT();
   const [scrolled, setScrolled]       = useState(false);
   const [logoVisible, setLogoVisible] = useState(false);
   const [menuOpen, setMenuOpen]       = useState(false);
@@ -36,7 +38,10 @@ export default function Navbar({ navigate }) {
     setMenuOpen(false);
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else navigate(`/${href}`); // seção não está nesta página: vai para a Home e rola até ela
   };
+
+  const showLogo = logoVisible || logoAlwaysVisible;
 
   const linkStyle = {
     color: 'rgba(241,245,249,0.85)',
@@ -82,10 +87,10 @@ export default function Navbar({ navigate }) {
           style={{
             display: 'flex', alignItems: 'center',
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-            opacity: logoVisible ? 1 : 0,
-            transform: logoVisible ? 'translateY(0)' : 'translateY(-8px)',
+            opacity: showLogo ? 1 : 0,
+            transform: showLogo ? 'translateY(0)' : 'translateY(-8px)',
             transition: 'opacity 0.35s ease, transform 0.35s ease',
-            pointerEvents: logoVisible ? 'auto' : 'none',
+            pointerEvents: showLogo ? 'auto' : 'none',
             flexShrink: 0,
             marginRight: 6,
           }}
@@ -123,7 +128,7 @@ export default function Navbar({ navigate }) {
                   onMouseEnter={e => { e.currentTarget.style.color = '#9bc8a9'; e.currentTarget.style.background = 'rgba(155,200,169,0.1)'; }}
                   onMouseLeave={e => { e.currentTarget.style.color = 'rgba(241,245,249,0.85)'; e.currentTarget.style.background = 'transparent'; }}
                 >
-                  {link.label}
+                  {t(link.key)}
                 </a>
               </span>
             ))}
@@ -186,7 +191,7 @@ export default function Navbar({ navigate }) {
               onClick={e => handleAnchor(e, link.href)}
               style={{ display: 'block', color: 'rgba(241,245,249,0.8)', fontFamily: "'Alumni Sans', sans-serif", fontSize: 20, fontWeight: 400, fontStyle: 'italic', letterSpacing: '0.06em', textDecoration: 'none', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
             >
-              {link.label}
+              {t(link.key)}
             </a>
           ))}
           <a

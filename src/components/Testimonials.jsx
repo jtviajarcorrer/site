@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { TESTIMONIALS } from '../data/expeditions.js';
 import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useT } from '../content/SiteTexts.jsx';
+
+const GOLD_TEXT = { background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' };
 
 export default function Testimonials() {
+  const { rich } = useT();
   const [active, setActive] = useState(0);
   const prev = () => setActive(a => (a - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
   const next = () => setActive(a => (a + 1) % TESTIMONIALS.length);
@@ -13,8 +17,7 @@ export default function Testimonials() {
         <div className="reveal" style={{ textAlign: 'center', marginBottom: 56 }}>
 
           <h2 className="section-title" style={{ margin: 0 }}>
-            Quem correu,{' '}
-            <span style={{ background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>voltou</span>
+            {rich('voltou_titulo', [GOLD_TEXT])}
           </h2>
         </div>
 

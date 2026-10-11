@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapPin, Calendar, ArrowRight, ArrowLeft, Zap, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Calendar, ArrowRight, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { brl, getInstallments, getCashPrice } from '../utils/pricing.js';
+import { useT } from '../content/SiteTexts.jsx';
 
 function ExpeditionCard({ exp, navigate }) {
+  const { t } = useT();
+  const isPast = !!exp._past;
   const [expanded, setExpanded] = useState(false);
 
-  const handleCardClick = () => setExpanded(!expanded);
+  const handleCardClick = () => { if (!isPast) setExpanded(!expanded); };
   
   const handleNavigate = (e) => {
     e.stopPropagation();
@@ -14,21 +18,23 @@ function ExpeditionCard({ exp, navigate }) {
   return (
     <div
       onClick={handleCardClick}
+      aria-disabled={isPast || undefined}
       style={{
-        position: 'relative', borderRadius: 20, overflow: 'hidden', cursor: 'pointer',
-        background: 'rgba(18,65,92,0.12)',
-        border: '1px solid rgba(155,200,169,0.1)',
+        position: 'relative', borderRadius: 20, overflow: 'hidden', cursor: isPast ? 'default' : 'pointer',
+        background: isPast ? 'rgba(255,255,255,0.03)' : 'rgba(18,65,92,0.12)',
+        border: isPast ? '1px dashed rgba(241,245,249,0.14)' : '1px solid rgba(155,200,169,0.1)',
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         display: 'flex', flexDirection: 'column',
         width: expanded ? 340 : 260,
-        height: expanded ? 480 : 270,
+        height: expanded ? 530 : 270,
+        ...(isPast ? { filter: 'grayscale(1)', opacity: 0.4, userSelect: 'none' } : {}),
       }}
-      onMouseEnter={e => {
+      onMouseEnter={isPast ? undefined : e => {
         e.currentTarget.style.transform = 'translateY(-6px)';
         e.currentTarget.style.boxShadow = '0 24px 60px rgba(0,65,64,0.4), 0 0 0 1px rgba(218,184,63,0.25)';
         e.currentTarget.style.borderColor = 'rgba(218,184,63,0.35)';
       }}
-      onMouseLeave={e => {
+      onMouseLeave={isPast ? undefined : e => {
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.boxShadow = 'none';
         e.currentTarget.style.borderColor = 'rgba(155,200,169,0.1)';
@@ -36,43 +42,46 @@ function ExpeditionCard({ exp, navigate }) {
     >
       {/* Cover image */}
       <div style={{ position: 'relative', height: expanded ? 200 : 150, overflow: 'hidden', flexShrink: 0, transition: 'height 0.4s ease' }}>
-        <img
-          src={exp.cover_image}
-          alt={exp.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
-          onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
-          onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-        />
+        {exp.cover_image ? (
+          <img
+            src={exp.cover_image}
+            alt={exp.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
+            onMouseEnter={e => { if (!isPast) e.target.style.transform = 'scale(1.05)'; }}
+            onMouseLeave={e => { if (!isPast) e.target.style.transform = 'scale(1)'; }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #004140 0%, #12415c 60%, #080d18 100%)' }} />
+        )}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6,14,24,0.92) 0%, transparent 60%)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,65,64,0.1) 0%, transparent 40%)' }} />
 
-        {/* No flag/country block as requested */}
-
-        {/* Highlight badge */}
-        {exp.highlight && expanded && (
-          <div style={{ position: 'absolute', top: 12, right: 12, background: 'linear-gradient(135deg, #dab83f, #e8ca6a)', borderRadius: 99, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Zap size={10} fill="#06111a" color="#06111a" />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, fontWeight: 700, color: '#06111a', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Destaque</span>
+        {/* Past expedition badge */}
+        {isPast && (
+          <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(241,245,249,0.9)', borderRadius: 99, padding: '4px 10px' }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 700, color: '#06111a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{t('card_encerrada')}</span>
           </div>
         )}
 
         {/* Spots urgency */}
-        {exp.spots_left && exp.spots_left <= 6 && (
+        {!isPast && exp.spots_left && exp.spots_left <= 6 && (
           <div style={{ position: 'absolute', bottom: 14, left: 14, background: 'rgba(218,184,63,0.9)', borderRadius: 99, padding: '4px 10px' }}>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: '#06111a' }}>🔥 Últimas {exp.spots_left} vagas!</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: '#06111a' }}>{t('card_ultimas_vagas', { vagas: exp.spots_left })}</span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div style={{ padding: expanded ? '20px 22px 22px' : '16px', display: 'flex', flexDirection: 'column', flexGrow: 1, transition: 'padding 0.4s ease' }}>
+      <div style={{ padding: expanded ? '20px 22px 30px' : '16px', display: 'flex', flexDirection: 'column', flexGrow: 1, transition: 'padding 0.4s ease' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: expanded ? 28 : 24, fontWeight: 900, letterSpacing: '0.02em', textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 8px', lineHeight: 1, transition: 'font-size 0.4s ease' }}>
             {exp.name}
           </h3>
-          <div style={{ color: 'rgba(155,200,169,0.5)', marginTop: 4 }}>
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </div>
+          {!isPast && (
+            <div style={{ color: 'rgba(155,200,169,0.5)', marginTop: 4 }}>
+              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          )}
         </div>
 
         {/* Date and Modalities (Distances) */}
@@ -116,10 +125,26 @@ function ExpeditionCard({ exp, navigate }) {
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(155,200,169,0.1)', paddingTop: 16, marginTop: 'auto' }}>
                 <div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: 'rgba(155,200,169,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>a partir de</div>
-                  <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 26, fontWeight: 900, background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>
-                    {exp.price ? `R$ ${Number(exp.price).toLocaleString('pt-BR')}` : 'Sob Consulta'}
-                  </div>
+                  {(() => {
+                    const inst = getInstallments(exp);
+                    const cash = getCashPrice(exp);
+                    const label = { fontFamily: "'Inter', sans-serif", fontSize: 11, color: 'rgba(155,200,169,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' };
+                    const big = { fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 26, fontWeight: 900, background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 };
+                    if (!inst && !cash) return <div style={big}>{t('card_sob_consulta')}</div>;
+                    return (
+                      <>
+                        <div style={label}>
+                          {inst ? (inst.entry ? t('card_entrada_parcelas', { entrada: brl(inst.entry), parcelas: inst.max }) : t('card_so_parcelas', { parcelas: inst.max })) : t('card_a_vista')}
+                        </div>
+                        <div style={big}>{inst ? brl(inst.value) : brl(cash)}</div>
+                        {inst && cash && (
+                          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: 'rgba(241,245,249,0.5)', marginTop: 4 }}>
+                            {t('card_ou_a_vista', { valor: brl(cash) })}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <button
                   onClick={handleNavigate}
@@ -127,7 +152,7 @@ function ExpeditionCard({ exp, navigate }) {
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(218,184,63,0.15)'; e.currentTarget.style.borderColor = 'rgba(218,184,63,0.4)'; e.currentTarget.style.color = '#dab83f'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,65,64,0.3)'; e.currentTarget.style.borderColor = 'rgba(155,200,169,0.2)'; e.currentTarget.style.color = '#9bc8a9'; }}
                 >
-                  Ver <ArrowRight size={14} />
+                  {t('card_ver')} <ArrowRight size={14} />
                 </button>
               </div>
             </div>
@@ -274,17 +299,33 @@ function YearTimeline({ year, monthsData, navigate }) {
   );
 }
 
-export default function ExpeditionsGrid({ expeditions, navigate }) {
+export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
+  const { t, rich } = useT();
+  // Re-observa os .reveal quando os dados chegam (a timeline monta depois do carregamento)
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); observer.unobserve(e.target); } }),
       { threshold: 0.1 }
     );
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    document.querySelectorAll('.reveal:not(.revealed)').forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [loading, expeditions]);
 
-  const upcoming = expeditions
+  // Regra de exibição: somente expedições com "Destaque no Site" (highlight).
+  // - Futuras/em andamento: cards normais.
+  // - Já encerradas: apenas as 3 mais recentes, em modo "fantasma" (_past).
+  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+  const endOf = e => e.end_date || e.start_date || '';
+  const featured = (expeditions || []).filter(e => e.highlight && e.start_date);
+
+  const futureOnes = featured.filter(e => endOf(e) >= todayStr);
+  const lastPast = featured
+    .filter(e => endOf(e) < todayStr)
+    .sort((a, b) => endOf(b).localeCompare(endOf(a)))
+    .slice(0, 3)
+    .map(e => ({ ...e, _past: true }));
+
+  const upcoming = [...lastPast, ...futureOnes]
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
   // Group by year and month
@@ -307,23 +348,45 @@ export default function ExpeditionsGrid({ expeditions, navigate }) {
         <div>
 
           <h2 className="section-title" style={{ margin: 0 }}>
-            Próximas{' '}
-            <span style={{ color: '#dab83f' }}>Expedições</span>
+            {rich('expedicoes_titulo', ['#dab83f'])}
           </h2>
         </div>
         <div className="header-divider" style={{ width: 1, height: 80, background: 'rgba(241,245,249,0.2)' }} />
         <p style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 24, fontWeight: 400, color: 'rgba(241,245,249,0.75)', maxWidth: 420, margin: 0, lineHeight: 1.2, letterSpacing: '0.05em' }}>
-          Explore nossos destinos incríveis programados e reserve sua próxima experiência com a JT.
+          {t('expedicoes_subtitulo')}
         </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
-        {Object.keys(grouped).sort().map(year => (
-          <YearTimeline key={year} year={year} monthsData={grouped[year]} navigate={navigate} />
-        ))}
-      </div>
+      {loading ? (
+        <div aria-busy="true" aria-label="Carregando expedições" style={{ display: 'flex', gap: 16, overflow: 'hidden' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} className="jt-skeleton" style={{
+              flexShrink: 0, width: 260, height: 270, borderRadius: 20,
+              background: 'rgba(18,65,92,0.12)', border: '1px solid rgba(155,200,169,0.1)',
+              animationDelay: `${i * 150}ms`,
+            }} />
+          ))}
+        </div>
+      ) : upcoming.length === 0 ? (
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: 'rgba(241,245,249,0.5)', margin: 0 }}>
+          {t('expedicoes_vazio')}
+        </p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+          {Object.keys(grouped).sort().map(year => (
+            <YearTimeline key={year} year={year} monthsData={grouped[year]} navigate={navigate} />
+          ))}
+        </div>
+      )}
 
       <style>{`
+        /* Loading skeleton (shown only inside this section) */
+        @keyframes jtSkeleton {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 0.7; }
+        }
+        .jt-skeleton { animation: jtSkeleton 1.4s ease-in-out infinite; }
+
         /* Hide native scrollbar */
         .timeline-horizontal-scroll::-webkit-scrollbar {
           display: none;

@@ -1,4 +1,7 @@
+import { useT } from '../content/SiteTexts.jsx';
+
 export default function Footer({ navigate }) {
+  const { t, rich } = useT();
   const InstagramIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
@@ -17,21 +20,23 @@ export default function Footer({ navigate }) {
         {/* Final CTA */}
         <div style={{ textAlign: 'center', padding: '64px 24px', background: '#004140', border: '1px solid rgba(155,200,169,0.2)', borderRadius: 28, marginBottom: 60 }}>
           <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 900, textTransform: 'uppercase', color: '#f1f5f9', lineHeight: 0.95, letterSpacing: '0.02em', margin: '0 0 16px' }}>
-            Pronto para sua{' '}
-            <span style={{ color: '#dab83f' }}>
-              próxima expedição?
-            </span>
+            {rich('rodape_titulo', ['#dab83f'])}
           </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 17, color: 'rgba(155,200,169,0.85)', maxWidth: 460, margin: '0 auto 36px' }}>
-            Fale com nossa equipe e garanta sua vaga antes que esgote.
-          </p>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.7, color: 'rgba(155,200,169,0.85)', maxWidth: 680, margin: '0 auto 36px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <p style={{ margin: 0 }}>
+              {t('rodape_texto_1')}
+            </p>
+            <p style={{ margin: 0 }}>
+              {t('rodape_texto_2')}
+            </p>
+          </div>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="https://wa.me/5531996158950" target="_blank" rel="noopener noreferrer"
               style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: '#dab83f', color: '#06111a', fontFamily: "'Inter', sans-serif", fontWeight: 700, transition: 'opacity 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
             >
-              <WhatsAppIcon /> Falar no WhatsApp
+              <WhatsAppIcon /> {t('rodape_botao_whatsapp')}
             </a>
             <a href="https://www.instagram.com/jtviajarcorrer/" target="_blank" rel="noopener noreferrer"
               style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: 'transparent', border: '1.5px solid rgba(155,200,169,0.5)', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontWeight: 600, transition: 'border-color 0.2s, color 0.2s' }}
@@ -50,18 +55,18 @@ export default function Footer({ navigate }) {
           </button>
 
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: 'rgba(15,23,42,0.4)', margin: 0 }}>
-            © {new Date().getFullYear()} Just Travel — Expedições de Corrida. Todos os direitos reservados.
+            {t('rodape_copyright', { ano: new Date().getFullYear() })}
           </p>
 
           <div style={{ display: 'flex', gap: 12 }}>
             {[
-              { href: 'https://www.instagram.com/jtviajarcorrer/', Icon: InstagramIcon, hoverColor: '#9bc8a9' },
-              { href: 'https://wa.me/5531996158950', Icon: WhatsAppIcon, hoverColor: '#4ade80' },
-            ].map(({ href, Icon, hoverColor }) => (
-              <a key={href} href={href} target="_blank" rel="noopener noreferrer"
-                style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,65,64,0.25)', border: '1px solid rgba(155,200,169,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(155,200,169,0.5)', textDecoration: 'none', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,65,64,0.5)'; e.currentTarget.style.color = hoverColor; e.currentTarget.style.borderColor = `${hoverColor}44`; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,65,64,0.25)'; e.currentTarget.style.color = 'rgba(155,200,169,0.5)'; e.currentTarget.style.borderColor = 'rgba(155,200,169,0.12)'; }}
+              { href: 'https://www.instagram.com/jtviajarcorrer/', Icon: InstagramIcon, label: 'Instagram', hoverColor: '#dab83f' },
+              { href: 'https://wa.me/5531996158950', Icon: WhatsAppIcon, label: 'WhatsApp', hoverColor: '#4ade80' },
+            ].map(({ href, Icon, label, hoverColor }) => (
+              <a key={href} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+                style={{ width: 40, height: 40, borderRadius: '50%', background: '#004140', border: '1px solid #004140', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9bc8a9', textDecoration: 'none', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.color = hoverColor; e.currentTarget.style.borderColor = hoverColor; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#9bc8a9'; e.currentTarget.style.borderColor = '#004140'; }}
               >
                 <Icon />
               </a>

@@ -1,0 +1,602 @@
+[
+  {
+    "key": "menu_quem_somos",
+    "group": "Menu",
+    "where": "Menu superior (Home e páginas)",
+    "text": "Quem Somos"
+  },
+  {
+    "key": "menu_expedicoes",
+    "group": "Menu",
+    "where": "Menu superior",
+    "text": "Expedições"
+  },
+  {
+    "key": "menu_como_funciona",
+    "group": "Menu",
+    "where": "Menu superior",
+    "text": "Como Funciona"
+  },
+  {
+    "key": "menu_contato",
+    "group": "Menu",
+    "where": "Menu superior",
+    "text": "Contato"
+  },
+  {
+    "key": "hero_frase",
+    "group": "Hero",
+    "where": "Home - frase principal no topo. [[ ]] = trecho em dourado",
+    "text": "Viva a experiência de correr em [[destinos incríveis]] pelo mundo com pessoas de energia única."
+  },
+  {
+    "key": "hero_botao",
+    "group": "Hero",
+    "where": "Home - botão do topo",
+    "text": "Ver Expedições"
+  },
+  {
+    "key": "expedicoes_titulo",
+    "group": "Expedições (Home)",
+    "where": "Home - título da seção. [[ ]] = dourado",
+    "text": "Próximas [[Expedições]]"
+  },
+  {
+    "key": "expedicoes_subtitulo",
+    "group": "Expedições (Home)",
+    "where": "Home - frase ao lado do título",
+    "text": "Explore nossos destinos incríveis programados e reserve sua próxima experiência com a JT."
+  },
+  {
+    "key": "expedicoes_vazio",
+    "group": "Expedições (Home)",
+    "where": "Home - quando não há expedições",
+    "text": "Novas expedições em breve."
+  },
+  {
+    "key": "card_ver",
+    "group": "Expedições (Home)",
+    "where": "Card da expedição - botão",
+    "text": "Ver"
+  },
+  {
+    "key": "card_encerrada",
+    "group": "Expedições (Home)",
+    "where": "Card de expedição já encerrada - selo",
+    "text": "Encerrada"
+  },
+  {
+    "key": "card_destaque",
+    "group": "Expedições (Home)",
+    "where": "Card - selo de destaque",
+    "text": "Destaque"
+  },
+  {
+    "key": "card_ultimas_vagas",
+    "group": "Expedições (Home)",
+    "where": "Card - urgência. Use {vagas}",
+    "text": "🔥 Últimas {vagas} vagas!"
+  },
+  {
+    "key": "sobre_titulo",
+    "group": "Quem Somos (Home)",
+    "where": "Home - título. 1º [[ ]] verde, 2º dourado",
+    "text": "Correr é nossa [[paixão]], viajar é nossa [[missão]]"
+  },
+  {
+    "key": "sobre_paragrafo_1",
+    "group": "Quem Somos (Home)",
+    "where": "Home - 1º parágrafo",
+    "text": "A Just Travel nasceu da união de duas paixões: correr e explorar o mundo. Há mais de 8 anos organizamos expedições que transformam corredores em viajantes e destinos incríveis em memórias eternas."
+  },
+  {
+    "key": "sobre_paragrafo_2",
+    "group": "Quem Somos (Home)",
+    "where": "Home - 2º parágrafo",
+    "text": "Nossa comunidade de 46K seguidores sabe que cada quilômetro percorrido em um destino novo vale muito mais do que simplesmente cruzar a linha de chegada — é uma história que você carrega para sempre."
+  },
+  {
+    "key": "sobre_numero_1",
+    "group": "Quem Somos (Home)",
+    "where": "Home - número em destaque 1",
+    "text": "+5.000"
+  },
+  {
+    "key": "sobre_rotulo_1",
+    "group": "Quem Somos (Home)",
+    "where": "Home - legenda do número 1",
+    "text": "Corredores"
+  },
+  {
+    "key": "sobre_numero_2",
+    "group": "Quem Somos (Home)",
+    "where": "Home - número em destaque 2",
+    "text": "+120"
+  },
+  {
+    "key": "sobre_rotulo_2",
+    "group": "Quem Somos (Home)",
+    "where": "Home - legenda do número 2",
+    "text": "Destinos Realizados"
+  },
+  {
+    "key": "recomenda_titulo",
+    "group": "Depoimentos",
+    "where": "Home - título ao lado dos vídeos. [[ ]] = dourado",
+    "text": "Quem viaja, [[recomenda]]"
+  },
+  {
+    "key": "recomenda_subtitulo",
+    "group": "Depoimentos",
+    "where": "Home - frase abaixo do título",
+    "text": "Confira a energia de quem já cruzou a linha de chegada conosco pelos 4 cantos do mundo."
+  },
+  {
+    "key": "nps_nota",
+    "group": "Depoimentos",
+    "where": "Home - nota (card ao lado dos vídeos)",
+    "text": "9.8"
+  },
+  {
+    "key": "nps_titulo",
+    "group": "Depoimentos",
+    "where": "Home - título do card de NPS",
+    "text": "NPS 9.8 (EXCELENTE)"
+  },
+  {
+    "key": "nps_texto",
+    "group": "Depoimentos",
+    "where": "Home - texto do card de NPS",
+    "text": "Avaliação média dos nossos viajantes sobre a experiência de ponta a ponta com a JT."
+  },
+  {
+    "key": "voltou_titulo",
+    "group": "Depoimentos",
+    "where": "Home - título da seção de depoimentos escritos. [[ ]] = dourado",
+    "text": "Quem correu, [[voltou]]"
+  },
+  {
+    "key": "como_titulo",
+    "group": "Como Funciona",
+    "where": "Home - título. [[ ]] = dourado",
+    "text": "Sua jornada em [[4 passos]]"
+  },
+  {
+    "key": "como_subtitulo",
+    "group": "Como Funciona",
+    "where": "Home - frase abaixo do título",
+    "text": "Do sonho à linha de chegada — a JT transforma cada detalhe em uma expedição perfeita."
+  },
+  {
+    "key": "passo_1_titulo",
+    "group": "Como Funciona",
+    "where": "Passo 1",
+    "text": "Escolha seu Destino"
+  },
+  {
+    "key": "passo_1_texto",
+    "group": "Como Funciona",
+    "where": "Passo 1",
+    "text": "Navegue pelas expedições e encontre o destino que te desafia. Cada viagem une a emoção da corrida com experiências culturais únicas."
+  },
+  {
+    "key": "passo_2_titulo",
+    "group": "Como Funciona",
+    "where": "Passo 2",
+    "text": "Inscreva-se"
+  },
+  {
+    "key": "passo_2_texto",
+    "group": "Como Funciona",
+    "where": "Passo 2",
+    "text": "Preencha o formulário de interesse. Nossa equipe entra em contato para confirmar sua vaga, tirar dúvidas e te preparar para a aventura."
+  },
+  {
+    "key": "passo_3_titulo",
+    "group": "Como Funciona",
+    "where": "Passo 3",
+    "text": "Embarque Tranquilo"
+  },
+  {
+    "key": "passo_3_texto",
+    "group": "Como Funciona",
+    "where": "Passo 3",
+    "text": "A JT cuida de tudo — voos, hotéis, inscrição na prova e guia especializado. Você só precisa trazer a energia e os tênis de corrida."
+  },
+  {
+    "key": "passo_4_titulo",
+    "group": "Como Funciona",
+    "where": "Passo 4",
+    "text": "Cruze a Linha de Chegada"
+  },
+  {
+    "key": "passo_4_texto",
+    "group": "Como Funciona",
+    "where": "Passo 4",
+    "text": "Viva a experiência de cruzar o finish line em um destino incrível, ao lado de um grupo que vai se tornar família para sempre."
+  },
+  {
+    "key": "comunidade_titulo",
+    "group": "Comunidade (números)",
+    "where": "Home - título. [[ ]] = dourado",
+    "text": "Uma comunidade que [[corre o mundo]]"
+  },
+  {
+    "key": "comunidade_subtitulo",
+    "group": "Comunidade (números)",
+    "where": "Home - frase abaixo do título",
+    "text": "Mais de 8 anos transformando corredores em viajantes e destinos em memórias eternas."
+  },
+  {
+    "key": "estat_1_numero",
+    "group": "Comunidade (números)",
+    "where": "Número animado 1 (ex.: 46K+, 1.200+)",
+    "text": "46K+"
+  },
+  {
+    "key": "estat_1_rotulo",
+    "group": "Comunidade (números)",
+    "where": "Legenda do número 1",
+    "text": "Seguidores"
+  },
+  {
+    "key": "estat_2_numero",
+    "group": "Comunidade (números)",
+    "where": "Número animado 2",
+    "text": "9+"
+  },
+  {
+    "key": "estat_2_rotulo",
+    "group": "Comunidade (números)",
+    "where": "Legenda do número 2",
+    "text": "Destinos em 2026/27"
+  },
+  {
+    "key": "estat_3_numero",
+    "group": "Comunidade (números)",
+    "where": "Número animado 3",
+    "text": "8+"
+  },
+  {
+    "key": "estat_3_rotulo",
+    "group": "Comunidade (números)",
+    "where": "Legenda do número 3",
+    "text": "Anos de Expedições"
+  },
+  {
+    "key": "estat_4_numero",
+    "group": "Comunidade (números)",
+    "where": "Número animado 4",
+    "text": "1.200+"
+  },
+  {
+    "key": "estat_4_rotulo",
+    "group": "Comunidade (números)",
+    "where": "Legenda do número 4",
+    "text": "Corredores-Viajantes"
+  },
+  {
+    "key": "rodape_titulo",
+    "group": "Rodapé",
+    "where": "Chamada final (Home e páginas). [[ ]] = dourado",
+    "text": "Pronto para sua [[próxima expedição?]]"
+  },
+  {
+    "key": "rodape_texto_1",
+    "group": "Rodapé",
+    "where": "Chamada final - 1º parágrafo",
+    "text": "As vagas para as nossas expedições são limitadas, pois acreditamos que uma experiência inesquecível também depende de um grupo bem estruturado e de um cuidado especial com cada viajante."
+  },
+  {
+    "key": "rodape_texto_2",
+    "group": "Rodapé",
+    "where": "Chamada final - 2º parágrafo",
+    "text": "Sentimos muito caso o destino escolhido já esteja esgotado! Por isso, recomendamos que você reserve sua vaga com antecedência e garanta a oportunidade de viver essa experiência com a gente. Vamos adorar ter você nessa turma!"
+  },
+  {
+    "key": "rodape_botao_whatsapp",
+    "group": "Rodapé",
+    "where": "Chamada final - botão",
+    "text": "Falar no WhatsApp"
+  },
+  {
+    "key": "rodape_copyright",
+    "group": "Rodapé",
+    "where": "Linha de direitos autorais. Use {ano} para o ano atual",
+    "text": "© {ano} Just Travel — Expedições de Corrida. Todos os direitos reservados."
+  },
+  {
+    "key": "exp_voltar",
+    "group": "Página da Expedição",
+    "where": "Botão de voltar no topo",
+    "text": "Todas as expedições"
+  },
+  {
+    "key": "exp_info_datas",
+    "group": "Página da Expedição",
+    "where": "Faixa de informações - rótulo",
+    "text": "Datas"
+  },
+  {
+    "key": "exp_info_modalidades",
+    "group": "Página da Expedição",
+    "where": "Faixa de informações - rótulo",
+    "text": "Modalidades"
+  },
+  {
+    "key": "exp_info_vagas",
+    "group": "Página da Expedição",
+    "where": "Faixa de informações - rótulo",
+    "text": "Vagas disponíveis"
+  },
+  {
+    "key": "exp_info_ultimas_vagas",
+    "group": "Página da Expedição",
+    "where": "Faixa de informações - poucas vagas. Use {vagas}",
+    "text": "Últimas {vagas} vagas!"
+  },
+  {
+    "key": "exp_info_vagas_valor",
+    "group": "Página da Expedição",
+    "where": "Faixa de informações - vagas normais. Use {vagas}",
+    "text": "{vagas} vagas"
+  },
+  {
+    "key": "exp_info_a_vista",
+    "group": "Página da Expedição",
+    "where": "Faixa de informações - rótulo quando não há parcelamento",
+    "text": "À vista"
+  },
+  {
+    "key": "exp_info_parcelas",
+    "group": "Página da Expedição",
+    "where": "Faixa de informações - rótulo do parcelado. Use {parcelas}",
+    "text": "Em até {parcelas}x de"
+  },
+  {
+    "key": "exp_sobre_titulo",
+    "group": "Página da Expedição",
+    "where": "Título da seção",
+    "text": "Sobre a Expedição"
+  },
+  {
+    "key": "exp_perfil_titulo",
+    "group": "Página da Expedição",
+    "where": "Título da seção de perfil do grupo",
+    "text": "Quem viaja com a gente"
+  },
+  {
+    "key": "exp_perfil_texto",
+    "group": "Página da Expedição",
+    "where": "Perfil das pessoas do grupo (texto fixo, igual para todas as expedições)",
+    "text": "Corredores e corredoras de todos os níveis, de todo o Brasil, que enxergam a corrida como um jeito de viver e de conhecer o mundo. Uns buscam o pódio, outros a primeira medalha — o que une a tribo é o prazer de correr, viajar e viver cada destino juntos.\n\nRitmos diferentes, o mesmo destino: aqui ninguém corre sozinho."
+  },
+  {
+    "key": "exp_incluso_titulo",
+    "group": "Página da Expedição",
+    "where": "Título da seção",
+    "text": "O que está incluso"
+  },
+  {
+    "key": "exp_incluso_rotulo",
+    "group": "Página da Expedição",
+    "where": "Cabeçalho da coluna verde",
+    "text": "Incluso"
+  },
+  {
+    "key": "exp_nao_incluso_rotulo",
+    "group": "Página da Expedição",
+    "where": "Cabeçalho da coluna vermelha",
+    "text": "Não incluso"
+  },
+  {
+    "key": "exp_hospedagem_titulo",
+    "group": "Página da Expedição",
+    "where": "Título da seção",
+    "text": "A Hospedagem"
+  },
+  {
+    "key": "exp_hospedagem_link",
+    "group": "Página da Expedição",
+    "where": "Link nos cards dos hotéis",
+    "text": "Conhecer o hotel →"
+  },
+  {
+    "key": "exp_roteiro_titulo",
+    "group": "Página da Expedição",
+    "where": "Título da seção",
+    "text": "Roteiro Dia a Dia"
+  },
+  {
+    "key": "exp_roteiro_carregando",
+    "group": "Página da Expedição",
+    "where": "Enquanto o roteiro carrega",
+    "text": "Carregando roteiro..."
+  },
+  {
+    "key": "exp_roteiro_vazio",
+    "group": "Página da Expedição",
+    "where": "Quando o roteiro ainda não foi publicado",
+    "text": "O roteiro completo estará disponível em breve."
+  },
+  {
+    "key": "exp_roteiro_dia",
+    "group": "Página da Expedição",
+    "where": "Cabeçalho de cada dia. Use {n}",
+    "text": "Dia {n}"
+  },
+  {
+    "key": "exp_roteiro_antes",
+    "group": "Página da Expedição",
+    "where": "Cabeçalho para atividades antes do início da expedição",
+    "text": "Antes da expedição"
+  },
+  {
+    "key": "exp_destino_titulo",
+    "group": "Página da Expedição",
+    "where": "Título da galeria de fotos",
+    "text": "Conheça o Destino"
+  },
+  {
+    "key": "exp_whatsapp_botao",
+    "group": "Página da Expedição",
+    "where": "Botão verde do WhatsApp",
+    "text": "Chamar no WhatsApp"
+  },
+  {
+    "key": "exp_whatsapp_mensagem",
+    "group": "Página da Expedição",
+    "where": "Mensagem pronta do WhatsApp. Use {nome} e {datas}",
+    "text": "Olá! Tenho interesse na expedição {nome} ({datas})"
+  },
+  {
+    "key": "confianca_1",
+    "group": "Página da Expedição",
+    "where": "Selos de confiança (barra lateral)",
+    "text": "Pagamento 100% seguro"
+  },
+  {
+    "key": "confianca_2",
+    "group": "Página da Expedição",
+    "where": "Selos de confiança (barra lateral)",
+    "text": "NPS 94 — clientes satisfeitos"
+  },
+  {
+    "key": "confianca_3",
+    "group": "Página da Expedição",
+    "where": "Selos de confiança (barra lateral)",
+    "text": "Resposta em até 24 horas"
+  },
+  {
+    "key": "preco_entrada_parcelas",
+    "group": "Valores",
+    "where": "Card de preço. Use {entrada} e {parcelas}",
+    "text": "Entrada {entrada} + até {parcelas} parcelas de"
+  },
+  {
+    "key": "preco_so_parcelas",
+    "group": "Valores",
+    "where": "Card de preço (sem entrada). Use {parcelas}",
+    "text": "Em até {parcelas} parcelas de"
+  },
+  {
+    "key": "preco_ou",
+    "group": "Valores",
+    "where": "Card de preço - separador",
+    "text": "ou"
+  },
+  {
+    "key": "preco_a_vista",
+    "group": "Valores",
+    "where": "Card de preço",
+    "text": "À vista via PIX (com desconto)"
+  },
+  {
+    "key": "preco_por_pessoa",
+    "group": "Valores",
+    "where": "Card de preço",
+    "text": "por pessoa"
+  },
+  {
+    "key": "preco_sob_consulta",
+    "group": "Valores",
+    "where": "Quando não há valor cadastrado",
+    "text": "Sob consulta"
+  },
+  {
+    "key": "card_entrada_parcelas",
+    "group": "Valores",
+    "where": "Card da Home. Use {entrada} e {parcelas}",
+    "text": "Entrada {entrada} + {parcelas}x de"
+  },
+  {
+    "key": "card_so_parcelas",
+    "group": "Valores",
+    "where": "Card da Home (sem entrada). Use {parcelas}",
+    "text": "{parcelas}x de"
+  },
+  {
+    "key": "card_a_vista",
+    "group": "Valores",
+    "where": "Card da Home (sem parcelamento)",
+    "text": "à vista"
+  },
+  {
+    "key": "card_ou_a_vista",
+    "group": "Valores",
+    "where": "Card da Home. Use {valor}",
+    "text": "ou {valor} à vista no PIX"
+  },
+  {
+    "key": "card_sob_consulta",
+    "group": "Valores",
+    "where": "Card da Home - quando não há valor",
+    "text": "Sob Consulta"
+  },
+  {
+    "key": "form_titulo",
+    "group": "Formulário",
+    "where": "Título do formulário de inscrição",
+    "text": "Reserve sua vaga"
+  },
+  {
+    "key": "form_subtitulo",
+    "group": "Formulário",
+    "where": "Frase abaixo do título",
+    "text": "Preencha e nossa equipe entra em contato em até 24h."
+  },
+  {
+    "key": "form_nome",
+    "group": "Formulário",
+    "where": "Campo (texto de exemplo dentro do campo)",
+    "text": "Nome completo"
+  },
+  {
+    "key": "form_email",
+    "group": "Formulário",
+    "where": "Campo",
+    "text": "E-mail"
+  },
+  {
+    "key": "form_whatsapp",
+    "group": "Formulário",
+    "where": "Campo",
+    "text": "WhatsApp (com DDD)"
+  },
+  {
+    "key": "form_instagram",
+    "group": "Formulário",
+    "where": "Campo",
+    "text": "Instagram"
+  },
+  {
+    "key": "form_botao",
+    "group": "Formulário",
+    "where": "Botão de envio",
+    "text": "Quero me inscrever"
+  },
+  {
+    "key": "form_enviando",
+    "group": "Formulário",
+    "where": "Botão enquanto envia",
+    "text": "Enviando..."
+  },
+  {
+    "key": "form_erro",
+    "group": "Formulário",
+    "where": "Mensagem de erro",
+    "text": "Erro ao enviar. Tente novamente."
+  },
+  {
+    "key": "form_sucesso_titulo",
+    "group": "Formulário",
+    "where": "Mensagem após enviar",
+    "text": "Interesse registrado!"
+  },
+  {
+    "key": "form_sucesso_texto",
+    "group": "Formulário",
+    "where": "Mensagem após enviar",
+    "text": "Nossa equipe entra em contato em até 24h pelo WhatsApp ou e-mail."
+  }
+]

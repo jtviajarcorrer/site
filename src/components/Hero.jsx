@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useT } from '../content/SiteTexts.jsx';
+
+const GOLD_TEXT = { background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' };
 
 export default function Hero({ navigate }) {
+  const { t, rich } = useT();
 
   useEffect(() => {
     const els = document.querySelectorAll('.hero-animate');
@@ -83,11 +87,7 @@ export default function Hero({ navigate }) {
             margin: 0,
             textAlign: 'right',
           }}>
-            Viva a experiência de correr em{' '}
-            <span style={{ background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              destinos incríveis
-            </span>{' '}
-            pelo mundo com pessoas de energia única.
+            {rich('hero_frase', [GOLD_TEXT])}
           </p>
 
           <button
@@ -111,7 +111,7 @@ export default function Hero({ navigate }) {
             onMouseEnter={e => e.currentTarget.style.color = '#dab83f'}
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(241,245,249,0.5)'}
           >
-            Ver Expedições
+            {t('hero_botao')}
             <ChevronDown size={18} style={{ animation: 'pulse-down 1.6s ease-in-out infinite' }} />
           </button>
         </div>

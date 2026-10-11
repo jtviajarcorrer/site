@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play, Star } from 'lucide-react';
+import { useT } from '../content/SiteTexts.jsx';
 
 const TESTIMONIAL_VIDEOS = [
   {
@@ -33,6 +34,7 @@ const TESTIMONIAL_VIDEOS = [
 ];
 
 export default function VideoCarousel() {
+  const { t } = useT();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const prev = () => {
@@ -165,14 +167,14 @@ export default function VideoCarousel() {
                   <Star size={20} color="#dab83f" />
                 </div>
                 <span style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 42, fontWeight: 900, color: 'rgba(218,184,63,0.1)', lineHeight: 1 }}>
-                  9.8
+                  {t('nps_nota')}
                 </span>
               </div>
               <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 24, fontWeight: 700, textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 8px' }}>
-                NPS 9.8 (EXCELENTE)
+                {t('nps_titulo')}
               </h3>
               <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: 'rgba(155,200,169,0.55)', lineHeight: 1.6, margin: 0 }}>
-                Avaliação média dos nossos viajantes sobre a experiência de ponta a ponta com a JT.
+                {t('nps_texto')}
               </p>
             </div>
           </div>

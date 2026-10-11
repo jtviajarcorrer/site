@@ -1,24 +1,27 @@
 import { Search, ClipboardList, Plane, Medal } from 'lucide-react';
+import { useT } from '../content/SiteTexts.jsx';
+
+const GOLD_TEXT = { background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' };
 
 const STEPS = [
-  { icon: Search,        step: '01', title: 'Escolha seu Destino',    desc: 'Navegue pelas expedições e encontre o destino que te desafia. Cada viagem une a emoção da corrida com experiências culturais únicas.', color: '#dab83f' },
-  { icon: ClipboardList, step: '02', title: 'Inscreva-se',            desc: 'Preencha o formulário de interesse. Nossa equipe entra em contato para confirmar sua vaga, tirar dúvidas e te preparar para a aventura.', color: '#9bc8a9' },
-  { icon: Plane,         step: '03', title: 'Embarque Tranquilo',     desc: 'A JT cuida de tudo — voos, hotéis, inscrição na prova e guia especializado. Você só precisa trazer a energia e os tênis de corrida.', color: '#9bc8a9' },
-  { icon: Medal,         step: '04', title: 'Cruze a Linha de Chegada', desc: 'Viva a experiência de cruzar o finish line em um destino incrível, ao lado de uma galera que vai se tornar família para sempre.', color: '#dab83f' },
+  { icon: Search,        step: '01', titleKey: 'passo_1_titulo', descKey: 'passo_1_texto', color: '#dab83f' },
+  { icon: ClipboardList, step: '02', titleKey: 'passo_2_titulo', descKey: 'passo_2_texto', color: '#9bc8a9' },
+  { icon: Plane,         step: '03', titleKey: 'passo_3_titulo', descKey: 'passo_3_texto', color: '#9bc8a9' },
+  { icon: Medal,         step: '04', titleKey: 'passo_4_titulo', descKey: 'passo_4_texto', color: '#dab83f' },
 ];
 
 export default function HowItWorks() {
+  const { t, rich } = useT();
   return (
     <section id="como-funciona" style={{ padding: '100px 24px', background: 'rgba(0,65,64,0.07)', borderTop: '1px solid rgba(155,200,169,0.07)', borderBottom: '1px solid rgba(155,200,169,0.07)' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div className="reveal" style={{ textAlign: 'center', marginBottom: 70 }}>
 
           <h2 className="section-title" style={{ marginBottom: 14 }}>
-            Sua jornada em{' '}
-            <span style={{ background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>4 passos</span>
+            {rich('como_titulo', [GOLD_TEXT])}
           </h2>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 17, color: 'rgba(155,200,169,0.6)', maxWidth: 440, margin: '0 auto' }}>
-            Do sonho à linha de chegada — a JT transforma cada detalhe em uma expedição perfeita.
+            {t('como_subtitulo')}
           </p>
         </div>
 
@@ -41,10 +44,10 @@ export default function HowItWorks() {
                     </span>
                   </div>
                   <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 24, fontWeight: 700, textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 10px' }}>
-                    {step.title}
+                    {t(step.titleKey)}
                   </h3>
                   <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: 'rgba(155,200,169,0.55)', lineHeight: 1.7, margin: 0 }}>
-                    {step.desc}
+                    {t(step.descKey)}
                   </p>
                 </div>
               </div>

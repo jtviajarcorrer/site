@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient.js';
-import { EXPEDITIONS as STATIC_EXPEDITIONS } from './data/expeditions.js';
 import HomePage from './pages/HomePage.jsx';
 import ExpeditionPage from './pages/ExpeditionPage.jsx';
+
+// Rola até a seção (#id). Tenta por ~3s porque a página de destino pode demorar a montar.
+function scrollToHash(hash, tries = 0) {
+  const el = hash ? document.querySelector(hash) : null;
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  else if (tries < 30) setTimeout(() => scrollToHash(hash, tries + 1), 100);
+}
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -13,38 +19,40 @@ export default function App() {
     const handlePop = () => setCurrentPath(window.location.pathname);
     window.addEventListener('popstate', handlePop);
     
-    // Fetch data from Supabase
+    // Fonte única: Supabase (alimentado pelo sync-monday). Sem dados de exemplo como plano B.
     async function fetchExpeditions() {
-      const { data, error } = await supabase.from('expeditions').select('*');
-      if (!error && data && data.length > 0) {
-        setExpeditions(data);
-      } else {
-        setExpeditions(STATIC_EXPEDITIONS); // fallback
-      }
+      const { data, error } = await supabase.from('expeditions').select('*').eq('highlight', true);
+      if (error) console.error('[expeditions] erro ao buscar no Supabase:', error.message);
+      setExpeditions(!error && data ? data : []);
       setLoading(false);
     }
     fetchExpeditions();
+    if (window.location.hash) scrollToHash(window.location.hash);
 
     return () => window.removeEventListener('popstate', handlePop);
   }, []);
 
   const navigate = (path) => {
+    const [pathname, hash] = path.split('#');
     window.history.pushState({}, '', path);
-    setCurrentPath(path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentPath(pathname || '/');
+    if (hash) scrollToHash('#' + hash);
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Route matching
   const slug = currentPath.replace(/^\//, '').replace(/\/$/, '');
   const expedition = slug ? expeditions.find(e => e.slug === slug) : null;
 
-  if (loading) {
-    return <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>Carregando expedições...</div>;
+  // A Home carrega na hora; o estado de carregamento fica só na seção de expedições.
+  // Apenas a página de uma expedição específica depende dos dados para renderizar.
+  if (loading && slug) {
+    return <div style={{ minHeight: '100vh', backgroundColor: '#080d18', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(241,245,249,0.6)', fontFamily: "'Inter', sans-serif" }}>Carregando...</div>;
   }
 
   if (expedition) {
     return <ExpeditionPage expedition={expedition} navigate={navigate} />;
   }
 
-  return <HomePage expeditions={expeditions} navigate={navigate} />;
+  return <HomePage expeditions={expeditions} loading={loading} navigate={navigate} />;
 }
