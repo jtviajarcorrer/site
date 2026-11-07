@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapPin, Calendar, ArrowRight, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, ArrowRight, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { brl, getInstallments, getCashPrice } from '../utils/pricing.js';
 import { useT } from '../content/SiteTexts.jsx';
+import { imgUrl } from '../utils/img.js';
+
+const MAX_CARDS_PER_ROW = 4;
 
 function ExpeditionCard({ exp, navigate }) {
   const { t } = useT();
@@ -25,7 +28,7 @@ function ExpeditionCard({ exp, navigate }) {
         border: isPast ? '1px dashed rgba(241,245,249,0.14)' : '1px solid rgba(155,200,169,0.1)',
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         display: 'flex', flexDirection: 'column',
-        width: expanded ? 340 : 260,
+        width: expanded ? 340 : 268,
         height: expanded ? 530 : 270,
         ...(isPast ? { filter: 'grayscale(1)', opacity: 0.4, userSelect: 'none' } : {}),
       }}
@@ -44,7 +47,9 @@ function ExpeditionCard({ exp, navigate }) {
       <div style={{ position: 'relative', height: expanded ? 200 : 150, overflow: 'hidden', flexShrink: 0, transition: 'height 0.4s ease' }}>
         {exp.cover_image ? (
           <img
-            src={exp.cover_image}
+            src={imgUrl(exp.cover_image, 640)}
+            loading="lazy"
+            decoding="async"
             alt={exp.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
             onMouseEnter={e => { if (!isPast) e.target.style.transform = 'scale(1.05)'; }}
@@ -90,7 +95,18 @@ function ExpeditionCard({ exp, navigate }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(155,200,169,0.6)', fontFamily: "'Inter', sans-serif", fontSize: 13 }}>
             <Calendar size={13} />
             <span>
-              {exp.date_label || (exp.start_date && exp.end_date ? `${new Date(exp.start_date + 'T12:00:00Z').getDate()} a ${new Date(exp.end_date + 'T12:00:00Z').getDate()} de ${new Date(exp.end_date + 'T12:00:00Z').toLocaleString('pt-BR', { month: 'short', timeZone: 'UTC' })}/${new Date(exp.end_date + 'T12:00:00Z').getFullYear().toString().slice(-2)}` : '')}
+              {exp.date_label || (() => {
+                if (!exp.start_date || !exp.end_date) return '';
+                const sd = new Date(exp.start_date + 'T12:00:00Z');
+                const ed = new Date(exp.end_date + 'T12:00:00Z');
+                const m1 = sd.toLocaleString('pt-BR', { month: 'short', timeZone: 'UTC' }).replace('.', '');
+                const m2 = ed.toLocaleString('pt-BR', { month: 'short', timeZone: 'UTC' }).replace('.', '');
+                const yr = ed.getUTCFullYear().toString().slice(-2);
+                if (sd.getUTCMonth() !== ed.getUTCMonth()) {
+                  return `${sd.getUTCDate()}/${m1} a ${ed.getUTCDate()}/${m2} de ${yr}`;
+                }
+                return `${sd.getUTCDate()} a ${ed.getUTCDate()} de ${m2}./${yr}`;
+              })()}
             </span>
           </div>
           
@@ -163,138 +179,276 @@ function ExpeditionCard({ exp, navigate }) {
   );
 }
 
-function YearTimeline({ year, monthsData, navigate }) {
+// Agrupa as expedições em linhas de até MAX_CARDS_PER_ROW (4) cards.
+// Quando um ano termina com menos de 4 cards na linha (ex.: 2026 com 2 expedições),
+// o próximo ano (2027) começa na mesma linha ocupando os espaços restantes até completar 4.
+function buildTimelineRows(upcoming) {
+  const rows = [];
+  const seenYears = new Set();
+
+  for (const exp of upcoming) {
+    const d = new Date(exp.start_date + 'T12:00:00Z');
+    const year = String(d.getUTCFullYear());
+    const rawMonth = d.toLocaleString('pt-BR', { month: 'long', timeZone: 'UTC' });
+    const month = rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1);
+
+    let currentRow = rows[rows.length - 1];
+    if (!currentRow || currentRow.totalCards >= MAX_CARDS_PER_ROW) {
+      currentRow = { segments: [], totalCards: 0 };
+      rows.push(currentRow);
+    }
+
+    let seg = currentRow.segments[currentRow.segments.length - 1];
+    if (!seg || seg.year !== year) {
+      const showYearHeader = !seenYears.has(year);
+      seenYears.add(year);
+      seg = { year, showYearHeader, months: [] };
+      currentRow.segments.push(seg);
+    }
+
+    let monthGroup = seg.months[seg.months.length - 1];
+    if (!monthGroup || monthGroup.month !== month) {
+      monthGroup = { month, exps: [] };
+      seg.months.push(monthGroup);
+    }
+
+    monthGroup.exps.push(exp);
+    currentRow.totalCards += 1;
+  }
+
+  return rows;
+}
+
+function TimelineRow({ row, navigate }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const rowHasAnyYearHeader = row.segments.some(s => s.showYearHeader);
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
     setCanScrollLeft(scrollLeft > 0);
-    // Use a small buffer to account for rounding errors
     setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 5);
   };
 
-  // Check scroll state on mount and resize
   useEffect(() => {
     handleScroll();
     window.addEventListener('resize', handleScroll);
     return () => window.removeEventListener('resize', handleScroll);
-  }, [monthsData]);
+  }, [row]);
 
   const scrollLeft = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: -388, behavior: 'smooth' });
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: -292, behavior: 'smooth' });
   };
-  
+
   const scrollRight = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: 388, behavior: 'smooth' });
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: 292, behavior: 'smooth' });
   };
 
   return (
-    <div className="reveal year-block">
-      {/* Year Header */}
-      <div style={{ 
-        display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24,
-        position: 'sticky', top: 72, zIndex: 10, background: 'rgba(8,13,24,0.95)', 
-        padding: '16px 0', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(218,184,63,0.1)'
-      }}>
-        <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 64, fontWeight: 900, color: '#dab83f', margin: 0, lineHeight: 0.8, letterSpacing: '0.02em' }}>
-          {year}
-        </h3>
-      </div>
-
-      {/* Months Timeline (Horizontal) */}
-      <div style={{ position: 'relative', marginTop: 16 }}>
-        {/* Horizontal line for the entire year */}
-        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, rgba(155,200,169,0.3) 50%, transparent 50%)', backgroundSize: '16px 2px' }} />
-
-        {/* Scrollable Container */}
-        <div ref={scrollRef} onScroll={handleScroll} className="timeline-horizontal-scroll" style={{ 
-          display: 'flex', gap: 24, overflowX: 'auto', paddingBottom: 24, paddingRight: 80,
-          scrollbarWidth: 'none', msOverflowStyle: 'none'
-        }}>
-          {Object.entries(monthsData).map(([month, exps], index) => (
-            <div key={month} style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-              
-              {/* Month Node */}
-              <div style={{ position: 'relative', height: 56 }}>
-                {/* Timeline Dot */}
-                <div style={{ 
-                  position: 'absolute', top: 4, left: 0, width: 18, height: 18, 
-                  borderRadius: '50%', background: '#080d18', border: '4px solid #9bc8a9',
-                  boxShadow: '0 0 16px rgba(155,200,169,0.5)', zIndex: 2
-                }} />
-                
-                {/* Month Label */}
-                <h4 style={{ 
-                  fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 500, 
-                  color: '#f1f5f9', margin: '36px 0 0 0', letterSpacing: '0.05em', whiteSpace: 'nowrap'
-                }}>
-                  {month}
-                </h4>
+    <div className="reveal year-block" style={{ position: 'relative' }}>
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="timeline-horizontal-scroll"
+        style={{
+          display: 'flex',
+          gap: 24,
+          overflowX: 'auto',
+          paddingBottom: 16,
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {row.segments.map((seg) => (
+          <div
+            key={seg.year}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flexShrink: 0,
+            }}
+          >
+            {/* Year Header (ou espaçador equivalente se outro segmento na mesma linha tiver título de ano) */}
+            {rowHasAnyYearHeader && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: 76,
+                  marginBottom: 16,
+                  padding: '12px 0',
+                  borderBottom: seg.showYearHeader ? '1px solid rgba(218,184,63,0.12)' : '1px solid transparent',
+                }}
+              >
+                {seg.showYearHeader && (
+                  <h3
+                    style={{
+                      fontFamily: "'Alumni Sans', sans-serif",
+                      fontStyle: 'italic',
+                      fontSize: 64,
+                      fontWeight: 900,
+                      color: '#dab83f',
+                      margin: 0,
+                      lineHeight: 0.8,
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    {seg.year}
+                  </h3>
+                )}
               </div>
+            )}
 
-              {/* Cards for this month horizontally */}
-              <div style={{ display: 'flex', gap: 16, marginTop: 16, alignItems: 'flex-start' }}>
-                {exps.map((exp, i) => (
-                  <div key={exp.id} className="reveal" style={{ flexShrink: 0, transitionDelay: `${i * 80}ms` }}>
-                    <ExpeditionCard exp={exp} navigate={navigate} />
+            {/* Months Timeline inside this year segment */}
+            <div style={{ position: 'relative' }}>
+              {/* Linha pontilhada horizontal cobrindo apenas a largura dos cards deste segmento */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  left: 0,
+                  right: 0,
+                  height: 2,
+                  background: 'linear-gradient(90deg, rgba(155,200,169,0.3) 50%, transparent 50%)',
+                  backgroundSize: '16px 2px',
+                }}
+              />
+
+              <div style={{ display: 'flex', gap: 24 }}>
+                {seg.months.map(({ month, exps }) => (
+                  <div key={`${seg.year}-${month}`} style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                    {/* Month Node */}
+                    <div style={{ position: 'relative', height: 56 }}>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 4,
+                          left: 0,
+                          width: 18,
+                          height: 18,
+                          borderRadius: '50%',
+                          background: '#080d18',
+                          border: '4px solid #9bc8a9',
+                          boxShadow: '0 0 16px rgba(155,200,169,0.5)',
+                          zIndex: 2,
+                        }}
+                      />
+                      <h4
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: 20,
+                          fontWeight: 500,
+                          color: '#f1f5f9',
+                          margin: '36px 0 0 0',
+                          letterSpacing: '0.05em',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {month}
+                      </h4>
+                    </div>
+
+                    {/* Cards deste mês */}
+                    <div style={{ display: 'flex', gap: 24, marginTop: 16, alignItems: 'flex-start' }}>
+                      {exps.map((exp, i) => (
+                        <div key={exp.id} className="reveal" style={{ flexShrink: 0, transitionDelay: `${i * 80}ms` }}>
+                          <ExpeditionCard exp={exp} navigate={navigate} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
-
             </div>
-          ))}
-        </div>
-        
-        {/* Left Arrow Overlay */}
-        {canScrollLeft && (
-          <div style={{ 
-            position: 'absolute', top: 50, left: -24, bottom: 24, width: 120, 
-            background: 'linear-gradient(to left, transparent, rgba(6,14,24,1) 80%)', 
-            pointerEvents: 'none', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 24 
-          }}>
-            <button 
-              className="pulse-arrow-left" 
-              onClick={scrollLeft}
-              aria-label="Rolar para a esquerda"
-              style={{ 
-                pointerEvents: 'auto', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                width: 44, height: 44, borderRadius: '50%', 
-                background: 'rgba(218,184,63,0.1)', color: '#dab83f', backdropFilter: 'blur(4px)' 
-              }}
-            >
-              <ArrowLeft size={20} />
-            </button>
           </div>
-        )}
-
-        {/* Right Arrow Overlay */}
-        {canScrollRight && (
-          <div style={{ 
-            position: 'absolute', top: 50, right: 0, bottom: 24, width: 160, 
-            background: 'linear-gradient(to right, transparent, rgba(6,14,24,0.95))', 
-            pointerEvents: 'none', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 16 
-          }}>
-            <button 
-              className="pulse-arrow" 
-              onClick={scrollRight}
-              aria-label="Rolar para a direita"
-              style={{ 
-                pointerEvents: 'auto', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                width: 44, height: 44, borderRadius: '50%', 
-                background: 'rgba(218,184,63,0.1)', color: '#dab83f', backdropFilter: 'blur(4px)' 
-              }}
-            >
-              <ArrowRight size={20} />
-            </button>
-          </div>
-        )}
+        ))}
       </div>
 
+      {/* Setas laterais (aparecem em telas menores quando a linha de 4 cards precisa rolar) */}
+      {canScrollLeft && (
+        <div
+          style={{
+            position: 'absolute',
+            top: rowHasAnyYearHeader ? 130 : 40,
+            left: -24,
+            bottom: 16,
+            width: 100,
+            background: 'linear-gradient(to left, transparent, rgba(6,14,24,0.95) 80%)',
+            pointerEvents: 'none',
+            zIndex: 5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            paddingLeft: 16,
+          }}
+        >
+          <button
+            className="pulse-arrow-left"
+            onClick={scrollLeft}
+            aria-label="Rolar para a esquerda"
+            style={{
+              pointerEvents: 'auto',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              background: 'rgba(218,184,63,0.12)',
+              color: '#dab83f',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <ArrowLeft size={20} />
+          </button>
+        </div>
+      )}
+
+      {canScrollRight && (
+        <div
+          style={{
+            position: 'absolute',
+            top: rowHasAnyYearHeader ? 130 : 40,
+            right: 0,
+            bottom: 16,
+            width: 100,
+            background: 'linear-gradient(to right, transparent, rgba(6,14,24,0.95) 80%)',
+            pointerEvents: 'none',
+            zIndex: 5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            paddingRight: 8,
+          }}
+        >
+          <button
+            className="pulse-arrow"
+            onClick={scrollRight}
+            aria-label="Rolar para a direita"
+            style={{
+              pointerEvents: 'auto',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              background: 'rgba(218,184,63,0.12)',
+              color: '#dab83f',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <ArrowRight size={20} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -328,19 +482,7 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
   const upcoming = [...lastPast, ...futureOnes]
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
-  // Group by year and month
-  const grouped = upcoming.reduce((acc, exp) => {
-    // Note: We create the date based on UTC to avoid timezone shifts affecting the month
-    const d = new Date(exp.start_date + 'T12:00:00Z');
-    const year = d.getUTCFullYear();
-    const month = d.toLocaleString('pt-BR', { month: 'long', timeZone: 'UTC' });
-    const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
-    
-    if (!acc[year]) acc[year] = {};
-    if (!acc[year][capitalizedMonth]) acc[year][capitalizedMonth] = [];
-    acc[year][capitalizedMonth].push(exp);
-    return acc;
-  }, {});
+  const timelineRows = buildTimelineRows(upcoming);
 
   return (
     <section id="expedicoes" style={{ padding: '80px 24px', maxWidth: 1200, margin: '0 auto' }}>
@@ -358,10 +500,10 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
       </div>
 
       {loading ? (
-        <div aria-busy="true" aria-label="Carregando expedições" style={{ display: 'flex', gap: 16, overflow: 'hidden' }}>
-          {[0, 1, 2].map(i => (
+        <div aria-busy="true" aria-label="Carregando expedições" style={{ display: 'flex', gap: 24, overflow: 'hidden' }}>
+          {[0, 1, 2, 3].map(i => (
             <div key={i} className="jt-skeleton" style={{
-              flexShrink: 0, width: 260, height: 270, borderRadius: 20,
+              flexShrink: 0, width: 268, height: 270, borderRadius: 20,
               background: 'rgba(18,65,92,0.12)', border: '1px solid rgba(155,200,169,0.1)',
               animationDelay: `${i * 150}ms`,
             }} />
@@ -372,9 +514,9 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
           {t('expedicoes_vazio')}
         </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
-          {Object.keys(grouped).sort().map(year => (
-            <YearTimeline key={year} year={year} monthsData={grouped[year]} navigate={navigate} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
+          {timelineRows.map((row, idx) => (
+            <TimelineRow key={idx} row={row} navigate={navigate} />
           ))}
         </div>
       )}

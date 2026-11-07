@@ -36,6 +36,66 @@
     "text": "Ver Expedições"
   },
   {
+    "key": "para_quem_titulo",
+    "group": "Para Quem (Home)",
+    "where": "Home - título da seção antes das expedições. [[ ]] = dourado",
+    "text": "Para quem é a [[viagem da JT?]]"
+  },
+  {
+    "key": "para_quem_subtitulo",
+    "group": "Para Quem (Home)",
+    "where": "Home - frase ao lado do título",
+    "text": "Mais do que correr em lugares extraordinários, o ponto alto de cada expedição são as pessoas: viver novos destinos, compartilhar histórias e criar laços para a vida toda através do esporte e da saúde."
+  },
+  {
+    "key": "para_quem_1_titulo",
+    "group": "Para Quem (Home)",
+    "where": "Card 1 - título",
+    "text": "Laços para a vida toda"
+  },
+  {
+    "key": "para_quem_1_texto",
+    "group": "Para Quem (Home)",
+    "where": "Card 1 - descrição",
+    "text": "O grande destaque da viagem é o grupo. É a experiência de desbravar novos destinos fazendo amizades verdadeiras, compartilhando histórias à mesa e criando conexões que permanecem muito depois da linha de chegada."
+  },
+  {
+    "key": "para_quem_2_titulo",
+    "group": "Para Quem (Home)",
+    "where": "Card 2 - título",
+    "text": "Mesmo indo sozinho, você nunca corre só"
+  },
+  {
+    "key": "para_quem_2_texto",
+    "group": "Para Quem (Home)",
+    "where": "Card 2 - descrição",
+    "text": "Grande parte dos nossos viajantes embarca desacompanhada — e também recebemos casais e amigos. Desde o primeiro dia, a energia do esporte e da saúde aproxima todo mundo em uma mesma sintonia."
+  },
+  {
+    "key": "para_quem_3_titulo",
+    "group": "Para Quem (Home)",
+    "where": "Card 3 - título",
+    "text": "Dos primeiros 5K à maratona"
+  },
+  {
+    "key": "para_quem_3_texto",
+    "group": "Para Quem (Home)",
+    "where": "Card 3 - descrição",
+    "text": "Não importa o seu ritmo ou se você busca a primeira medalha. As provas têm diferentes distâncias — e acompanhantes que não correm também vivem 100% dos passeios e das celebrações com o grupo."
+  },
+  {
+    "key": "para_quem_4_titulo",
+    "group": "Para Quem (Home)",
+    "where": "Card 4 - título",
+    "text": "Roteiro completo e zero preocupação"
+  },
+  {
+    "key": "para_quem_4_texto",
+    "group": "Para Quem (Home)",
+    "where": "Card 4 - descrição",
+    "text": "Unimos a prova a passeios autênticos, cultura e gastronomia local, com hotel, inscrição, logística e equipe da JT cuidando de tudo para você só se preocupar em viver o momento."
+  },
+  {
     "key": "expedicoes_titulo",
     "group": "Expedições (Home)",
     "where": "Home - título da seção. [[ ]] = dourado",
@@ -459,7 +519,7 @@
     "key": "confianca_2",
     "group": "Página da Expedição",
     "where": "Selos de confiança (barra lateral)",
-    "text": "NPS 94 — clientes satisfeitos"
+    "text": "NPS 9.8 — clientes satisfeitos"
   },
   {
     "key": "confianca_3",
@@ -598,5 +658,65 @@
     "group": "Formulário",
     "where": "Mensagem após enviar",
     "text": "Nossa equipe entra em contato em até 24h pelo WhatsApp ou e-mail."
+  },
+  {
+    "key": "links_subtitulo",
+    "group": "Links (Bio)",
+    "where": "Página /links - frase abaixo da logo",
+    "text": "Expedições de Corrida pelo Mundo · Corra e viva destinos incríveis."
+  },
+  {
+    "key": "links_expedicoes_titulo",
+    "group": "Links (Bio)",
+    "where": "Página /links - título da lista de expedições. [[ ]] = dourado",
+    "text": "Próximas [[Expedições]]"
+  },
+  {
+    "key": "links_botao_whatsapp",
+    "group": "Links (Bio)",
+    "where": "Página /links - título do botão do WhatsApp",
+    "text": "Falar no WhatsApp"
+  },
+  {
+    "key": "links_botao_whatsapp_sub",
+    "group": "Links (Bio)",
+    "where": "Página /links - subtítulo do botão do WhatsApp",
+    "text": "Tire dúvidas e garanta sua vaga com a equipe"
+  },
+  {
+    "key": "links_botao_site",
+    "group": "Links (Bio)",
+    "where": "Página /links - título do botão do site",
+    "text": "Site Oficial Just Travel"
+  },
+  {
+    "key": "links_botao_site_sub",
+    "group": "Links (Bio)",
+    "where": "Página /links - subtítulo do botão do site",
+    "text": "Conheça nossa história e todos os destinos"
+  },
+  {
+    "key": "links_botao_adv",
+    "group": "Links (Bio)",
+    "where": "Página /links - título do botão da Área do Viajante",
+    "text": "Área do Viajante"
+  },
+  {
+    "key": "links_botao_adv_sub",
+    "group": "Links (Bio)",
+    "where": "Página /links - subtítulo do botão da Área do Viajante",
+    "text": "Acesso exclusivo para inscritos"
+  },
+  {
+    "key": "links_botao_instagram",
+    "group": "Links (Bio)",
+    "where": "Página /links - título do botão do Instagram",
+    "text": "Instagram @jtviajarcorrer"
+  },
+  {
+    "key": "links_botao_instagram_sub",
+    "group": "Links (Bio)",
+    "where": "Página /links - subtítulo do botão do Instagram",
+    "text": "Acompanhe os bastidores das expedições"
   }
 ]

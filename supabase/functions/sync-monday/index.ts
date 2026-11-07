@@ -271,6 +271,10 @@ async function syncDays(sb: Any, expeditionId: string, startDate: string, summar
 
   // Grava os atuais e remove os que saíram do Monday / foram desmarcados (inclui dados antigos sem monday_item_id)
   if (rows.length) {
+    const mondayIds = rows.map((r) => r.monday_item_id);
+    // Se um item do Itinerário mudou de expedição no Monday (ex.: Pipa 26 -> Pipa 27),
+    // remove o vínculo antigo antes do upsert para não violar expedition_days_monday_item_id_key.
+    await sb.from('expedition_days').delete().in('monday_item_id', mondayIds).neq('expedition_id', expeditionId);
     const { error } = await sb.from('expedition_days').upsert(rows, { onConflict: 'id' });
     if (error) throw new Error('upsert expedition_days: ' + error.message);
   }

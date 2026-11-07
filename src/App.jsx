@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient.js';
 import HomePage from './pages/HomePage.jsx';
 import ExpeditionPage from './pages/ExpeditionPage.jsx';
+import LinksPage from './pages/LinksPage.jsx';
 
 // Rola até a seção (#id). Tenta por ~3s porque a página de destino pode demorar a montar.
 function scrollToHash(hash, tries = 0) {
@@ -41,7 +42,12 @@ export default function App() {
   };
 
   // Route matching
-  const slug = currentPath.replace(/^\//, '').replace(/\/$/, '');
+  const slug = currentPath.replace(/^\//, '').replace(/\/$/, '').toLowerCase();
+
+  if (slug === 'links' || slug === 'bio' || slug === 'linktree') {
+    return <LinksPage expeditions={expeditions} loading={loading} navigate={navigate} />;
+  }
+
   const expedition = slug ? expeditions.find(e => e.slug === slug) : null;
 
   // A Home carrega na hora; o estado de carregamento fica só na seção de expedições.

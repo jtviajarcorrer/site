@@ -9,6 +9,7 @@ import {
 import { supabase } from '../supabaseClient.js';
 import { brl, getInstallments, getCashPrice } from '../utils/pricing.js';
 import { useT } from '../content/SiteTexts.jsx';
+import { imgUrl } from '../utils/img.js';
 
 /* ─── Design tokens — JT light theme ─── */
 const T = {
@@ -182,7 +183,8 @@ function DayItem({ g, defaultOpen = false }) {
                 {it.photos?.length > 0 && (
                   <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                     {it.photos.map((src, i) => (
-                      <img key={i} src={src} alt={it.title} loading="lazy"
+                      <img key={i} src={imgUrl(src, 320)} alt={it.title} loading="lazy" decoding="async"
+                        onError={e => { e.currentTarget.style.display = 'none'; }}
                         style={{ width: 96, height: 72, objectFit: 'cover', borderRadius: 8, display: 'block' }} />
                     ))}
                   </div>
@@ -231,20 +233,32 @@ export default function ExpeditionPage({ expedition, navigate }) {
     if (!exp.start_date || !exp.end_date) return exp.date_label || '';
     const sd = new Date(exp.start_date + 'T12:00:00Z');
     const ed = new Date(exp.end_date + 'T12:00:00Z');
-    const m = sd.toLocaleString('pt-BR', { month: 'long', timeZone: 'UTC' });
-    return `${sd.getUTCDate()} a ${ed.getUTCDate()} de ${m.charAt(0).toUpperCase() + m.slice(1)} de ${ed.getUTCFullYear()}`;
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const m1 = cap(sd.toLocaleString('pt-BR', { month: 'long', timeZone: 'UTC' }));
+    const m2 = cap(ed.toLocaleString('pt-BR', { month: 'long', timeZone: 'UTC' }));
+    if (sd.getUTCMonth() !== ed.getUTCMonth()) {
+      return `${sd.getUTCDate()}/${m1} a ${ed.getUTCDate()}/${m2} de ${ed.getUTCFullYear()}`;
+    }
+    return `${sd.getUTCDate()} a ${ed.getUTCDate()} de ${m1} de ${ed.getUTCFullYear()}`;
   };
   const dateLabel = formatDateRange();
+  const heroYear = (exp.start_date || exp.end_date || '').slice(0, 4);
 
   const installments = getInstallments(exp);
   const cashPrice = getCashPrice(exp);
+
+  const BrlIcon = ({ color = '#004140' }) => (
+    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 800, color, letterSpacing: '-0.03em', lineHeight: 1 }}>
+      R$
+    </span>
+  );
 
   const highlights = [
     { id: 'datas', Icon: Calendar, label: t('exp_info_datas'), value: dateLabel },
     { id: 'modalidades', Icon: Route, label: t('exp_info_modalidades'), value: exp.modalities?.join(' · ') || '—' },
     installments
-      ? { id: 'preco', Icon: DollarSign, label: t('exp_info_parcelas', { parcelas: installments.max }), value: brl(installments.value) }
-      : { id: 'preco', Icon: DollarSign, label: t('exp_info_a_vista'), value: cashPrice ? brl(cashPrice) : t('preco_sob_consulta') },
+      ? { id: 'preco', Icon: BrlIcon, label: t('exp_info_parcelas', { parcelas: installments.max }), value: brl(installments.value) }
+      : { id: 'preco', Icon: BrlIcon, label: t('exp_info_a_vista'), value: cashPrice ? brl(cashPrice) : t('preco_sob_consulta') },
     { id: 'vagas', Icon: Users, label: t('exp_info_vagas'), value: exp.spots_left != null ? (exp.spots_left <= 6 ? t('exp_info_ultimas_vagas', { vagas: exp.spots_left }) : t('exp_info_vagas_valor', { vagas: exp.spots_left })) : '—' },
   ];
 
@@ -252,54 +266,52 @@ export default function ExpeditionPage({ expedition, navigate }) {
     <div style={{ background: T.bg, minHeight: '100vh' }}>
       <Navbar navigate={navigate} logoAlwaysVisible />
 
-      {/* ── Hero (full-bleed image, text overlay) ── */}
-      <div style={{ position: 'relative', height: '55vh', minHeight: 420, overflow: 'hidden' }}>
-        <img src={exp.cover_image} alt={exp.name} style={{
-          width: '100%', height: '100%', objectFit: 'cover',
-          transform: 'scale(1.04)', transition: 'transform 8s ease',
-        }} />
-        {/* gradient overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.60) 100%)' }} />
+      {/* ── Hero (mesmo estilo da home: foto desfocada + grade + degradês) ── */}
+      <div style={{ position: 'relative', height: '60vh', minHeight: 440, overflow: 'hidden', background: '#060e18' }}>
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          <img src={imgUrl(exp.cover_image, 1600)} alt="" aria-hidden="true" fetchpriority="high" className="kenburns" style={{
+            width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%',
+            filter: 'brightness(1.1)',
+          }} />
+          {/* degradês nas bordas */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to top, rgba(6,14,24,1) 0%, rgba(6,14,24,0.6) 40%, rgba(6,14,24,0.2) 70%, rgba(8,13,24,0.5) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to right, rgba(6,14,24,0.8) 0%, transparent 50%, rgba(6,14,24,0.4) 100%)' }} />
+        </div>
 
-        {/* hero text */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 40px 44px' }}>
-          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            {/* tags */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-              {exp.country && (
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 5,
-                  background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.25)', borderRadius: 99,
-                  padding: '5px 12px', fontFamily: "'Inter', sans-serif", fontSize: 12,
-                  fontWeight: 500, color: '#fff', letterSpacing: '0.03em',
-                }}>
-                  <MapPin size={11} /> {exp.country}
-                </span>
-              )}
-              {exp.modalities?.map(m => (
-                <span key={m} style={{
-                  background: T.accent, borderRadius: 99, padding: '5px 12px',
-                  fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700,
-                  color: '#fff', letterSpacing: '0.04em',
-                }}>{m}</span>
-              ))}
-            </div>
-
+        {/* Conteúdo — nome à esquerda (ano como apoio dourado) e frase à direita, alinhados pela mesma linha de base */}
+        <div className="exp-hero-content" style={{
+          position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 2,
+          maxWidth: 1200, margin: '0 auto', padding: '0 56px 56px',
+          display: 'flex', flexDirection: 'row', alignItems: 'last baseline', justifyContent: 'space-between', gap: 48,
+        }}>
+          <div>
+            {heroYear && (
+              <div style={{
+                fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontWeight: 700,
+                fontSize: 'clamp(24px, 3vw, 34px)', letterSpacing: '0.18em', lineHeight: 1, marginBottom: 10,
+                background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                width: 'fit-content',
+              }}>
+                {heroYear}
+              </div>
+            )}
             <h1 style={{
-              fontFamily: "'Alumni Sans', sans-serif",
-              fontSize: 'clamp(42px, 7vw, 80px)',
-              fontWeight: 900, textTransform: 'uppercase',
-              letterSpacing: '0.02em', color: '#fff', margin: '0 0 6px', lineHeight: 0.95,
+              fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic',
+              fontSize: 'clamp(48px, 8vw, 96px)', fontWeight: 900, textTransform: 'uppercase',
+              letterSpacing: '0.02em', color: '#f1f5f9', margin: 0, lineHeight: 0.92,
             }}>
               {exp.name}
             </h1>
-            {exp.slogan && (
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 300, color: 'rgba(255,255,255,0.82)', margin: 0 }}>
-                {exp.slogan}
-              </p>
-            )}
           </div>
+          {exp.slogan && (
+            <p className="exp-hero-slogan" style={{
+              fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic',
+              fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, lineHeight: 1.1,
+              color: '#f1f5f9', margin: 0, textAlign: 'right', maxWidth: 520,
+            }}>
+              {exp.slogan}
+            </p>
+          )}
         </div>
       </div>
 
@@ -365,10 +377,10 @@ export default function ExpeditionPage({ expedition, navigate }) {
                 {exp.included && (
                   <div style={{ background: T.mintBg, border: `1px solid rgba(155,200,169,0.25)`, borderRadius: 16, padding: 24 }}>
                     <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.accent, margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Check size={14} /> {t('exp_incluso_rotulo')}
+                      {t('exp_incluso_rotulo')}
                     </h4>
                     <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {exp.included.split(/\\n|\r?\n/).map(s => s.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean).map((item, i) => (
+                      {exp.included.split(/\\n|\r?\n/).map(s => s.replace(/^[\s\p{Pd}\p{So}\p{Sm}•·∙⋅*▪▫▸▹►▻✓✔✅✗✘❌✖➖➕\uFE0E\uFE0F\u200B]+/u, '').trim()).filter(Boolean).map((item, i) => (
                         <li key={i} style={{ display: 'flex', gap: 10, fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMid, lineHeight: 1.4 }}>
                           <Check size={14} color={T.accent} style={{ flexShrink: 0, marginTop: 2 }} /> {item}
                         </li>
@@ -379,10 +391,10 @@ export default function ExpeditionPage({ expedition, navigate }) {
                 {exp.not_included && (
                   <div style={{ background: 'rgba(232,25,60,0.04)', border: `1px solid rgba(232,25,60,0.14)`, borderRadius: 16, padding: 24 }}>
                     <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.accent, margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <X size={14} /> {t('exp_nao_incluso_rotulo')}
+                      {t('exp_nao_incluso_rotulo')}
                     </h4>
                     <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {exp.not_included.split(/\\n|\r?\n/).map(s => s.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean).map((item, i) => (
+                      {exp.not_included.split(/\\n|\r?\n/).map(s => s.replace(/^[\s\p{Pd}\p{So}\p{Sm}•·∙⋅*▪▫▸▹►▻✓✔✅✗✘❌✖➖➕\uFE0E\uFE0F\u200B]+/u, '').trim()).filter(Boolean).map((item, i) => (
                         <li key={i} style={{ display: 'flex', gap: 10, fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMid, lineHeight: 1.4 }}>
                           <X size={14} color={T.accent} style={{ flexShrink: 0, marginTop: 2 }} /> {item}
                         </li>
@@ -403,17 +415,10 @@ export default function ExpeditionPage({ expedition, navigate }) {
                 {exp.stays.map((s, i) => (
                   <div key={i} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
                     {s.photos?.[0] && (
-                      <img src={s.photos[0]} alt={s.name} loading="lazy" style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }} />
+                      <img src={imgUrl(s.photos[0], 640)} alt={s.name} loading="lazy" decoding="async" style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }} />
                     )}
                     <div style={{ padding: '16px 18px 18px' }}>
                       <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>{s.name}</div>
-                      {s.stars > 0 && (
-                        <div style={{ display: 'flex', gap: 2, marginTop: 8 }} aria-label={`${s.stars} estrelas`}>
-                          {Array.from({ length: Math.min(s.stars, 5) }).map((_, k) => (
-                            <Star key={k} size={14} color={T.gold} fill={T.gold} />
-                          ))}
-                        </div>
-                      )}
                       {s.website && (
                         <a href={s.website} target="_blank" rel="noopener noreferrer"
                           style={{ display: 'inline-block', marginTop: 10, fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.accent, textDecoration: 'none' }}>
@@ -450,7 +455,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                 {exp.gallery_images.map((img, i) => (
                   <div key={i} style={{ borderRadius: 12, overflow: 'hidden', aspectRatio: '4/3', boxShadow: T.shadow }}>
-                    <img src={img} alt="Galeria" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', display: 'block' }}
+                    <img src={imgUrl(img, 800)} alt="Galeria" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', display: 'block' }}
                       onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                     />
@@ -554,10 +559,14 @@ export default function ExpeditionPage({ expedition, navigate }) {
             grid-template-columns: repeat(2, 1fr) !important;
           }
         }
-        @media (max-width: 600px) {
-          div[style*="padding: 0 40px 44px"] {
-            padding: 0 20px 32px !important;
+        @media (max-width: 768px) {
+          .exp-hero-content {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+            padding: 0 24px 36px !important;
           }
+          .exp-hero-slogan { text-align: left !important; }
         }
       `}</style>
 

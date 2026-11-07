@@ -1,9 +1,9 @@
 import Navbar from '../components/Navbar.jsx';
 import Hero from '../components/Hero.jsx';
+import ForWho from '../components/ForWho.jsx';
 import ExpeditionsGrid from '../components/ExpeditionsGrid.jsx';
 import HowItWorks from '../components/HowItWorks.jsx';
 import Stats from '../components/Stats.jsx';
-import Testimonials from '../components/Testimonials.jsx';
 import Footer from '../components/Footer.jsx';
 import VideoCarousel from '../components/VideoCarousel.jsx';
 import { useT } from '../content/SiteTexts.jsx';
@@ -14,6 +14,8 @@ export default function HomePage({ expeditions, loading, navigate }) {
     <div style={{ minHeight: '100vh', background: 'var(--jt-bg)' }}>
       <Navbar navigate={navigate} />
       <Hero navigate={navigate} />
+      <ForWho />
+      <HowItWorks />
       <ExpeditionsGrid expeditions={expeditions} loading={loading} navigate={navigate} />
 
       {/* Sobre a JT */}
@@ -68,9 +70,7 @@ export default function HomePage({ expeditions, loading, navigate }) {
         </div>
       </section>
 
-      <HowItWorks />
-      <Stats />
-      <Testimonials />
+      <Stats expeditions={expeditions} />
 
       <Footer navigate={navigate} />
     </div>
