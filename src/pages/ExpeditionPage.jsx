@@ -59,8 +59,8 @@ function LeadForm({ expedition }) {
   if (status === 'success') {
     return (
       <div style={{ textAlign: 'center', padding: '40px 16px' }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', background: T.greenBg, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-          <CheckCircle size={32} color={T.green} />
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: T.mintBg, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+          <CheckCircle size={32} color={T.accent} />
         </div>
         <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, color: T.text, textTransform: 'uppercase', margin: '0 0 8px' }}>
           {t('form_sucesso_titulo')}
@@ -80,7 +80,7 @@ function LeadForm({ expedition }) {
     padding: '13px 16px',
     color: T.text,
     fontFamily: "'Inter', sans-serif",
-    fontSize: 14,
+    fontSize: 16,
     outline: 'none',
     transition: 'border-color 0.2s, background 0.2s',
   };
@@ -97,7 +97,7 @@ function LeadForm({ expedition }) {
         onFocus={e => { e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
         onBlur={e => { e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
       />
-      <input required type="text" style={inputStyle} placeholder={t('form_whatsapp')} value={form.phone}
+      <input required type="tel" style={inputStyle} placeholder={t('form_whatsapp')} value={form.phone}
         onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
         onFocus={e => { e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
         onBlur={e => { e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
@@ -147,12 +147,12 @@ function DayItem({ g, defaultOpen = false }) {
   const subtitle = dateObj ? `${cap(weekday)}, ${dateText}` : '';
   return (
     <div style={{ borderBottom: `1px solid ${T.border}` }}>
-      <button onClick={() => setOpen(o => !o)} style={{
+      <button className="exp-day-btn" onClick={() => setOpen(o => !o)} style={{
         width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-        display: 'flex', alignItems: 'center', gap: 16, padding: '20px 0', textAlign: 'left',
+        display: 'flex', alignItems: 'center', gap: 14, padding: '18px 0', textAlign: 'left',
       }}>
         <div style={{
-          minWidth: 40, height: 40, borderRadius: 8,
+          minWidth: 40, height: 40, borderRadius: 8, flexShrink: 0,
           background: open ? T.accentBg : T.bgMuted,
           border: `1.5px solid ${open ? T.accent : T.border}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -162,21 +162,25 @@ function DayItem({ g, defaultOpen = false }) {
         }}>
           {hasNumber ? g.number : '•'}
         </div>
-        <span style={{ flex: 1, fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text }}>
-          {title}
-          {subtitle && <span style={{ fontWeight: 400, color: T.textMuted, marginLeft: 10, fontSize: 13 }}>{subtitle}</span>}
+        <span className="exp-day-title-wrap" style={{ flex: 1, fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text }}>
+          <span>{title}</span>
+          {subtitle && <span className="exp-day-subtitle" style={{ fontWeight: 400, color: T.textMuted, marginLeft: 10, fontSize: 13 }}>{subtitle}</span>}
         </span>
-        {open ? <ChevronUp size={16} color={T.textMuted} /> : <ChevronDown size={16} color={T.textMuted} />}
+        {open ? <ChevronUp size={16} color={T.textMuted} style={{ flexShrink: 0 }} /> : <ChevronDown size={16} color={T.textMuted} style={{ flexShrink: 0 }} />}
       </button>
       {open && (
-        <ul style={{ listStyle: 'none', margin: '0 0 20px 56px', padding: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <ul className="exp-day-list" style={{ listStyle: 'none', margin: '0 0 20px 54px', padding: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
           {g.items.map(it => (
-            <li key={it.id} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-              <span style={{ minWidth: 78, fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.accent, paddingTop: 2 }}>
-                {it.start_time ? (it.end_time ? `${it.start_time}–${it.end_time}` : it.start_time) : ''}
-              </span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.text, lineHeight: 1.5 }}>{it.title}</div>
+            <li key={it.id} className="exp-day-item" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              {it.start_time ? (
+                <span className="exp-day-time" style={{ minWidth: 78, fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.accent, paddingTop: 2 }}>
+                  {it.end_time ? `${it.start_time}–${it.end_time}` : it.start_time}
+                </span>
+              ) : (
+                <span className="exp-day-time exp-day-time-empty" style={{ minWidth: 78 }} />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 600, color: T.text, lineHeight: 1.5 }}>{it.title}</div>
                 {it.description && (
                   <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.textMid, lineHeight: 1.6, margin: '4px 0 0' }}>{it.description}</p>
                 )}
@@ -262,12 +266,16 @@ export default function ExpeditionPage({ expedition, navigate }) {
     { id: 'vagas', Icon: Users, label: t('exp_info_vagas'), value: exp.spots_left != null ? (exp.spots_left <= 6 ? t('exp_info_ultimas_vagas', { vagas: exp.spots_left }) : t('exp_info_vagas_valor', { vagas: exp.spots_left })) : '—' },
   ];
 
+  const scrollToForm = () => {
+    document.getElementById('reservar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <div style={{ background: T.bg, minHeight: '100vh' }}>
+    <div style={{ background: T.bg, minHeight: '100vh', overflowX: 'hidden' }}>
       <Navbar navigate={navigate} logoAlwaysVisible />
 
       {/* ── Hero (mesmo estilo da home: foto desfocada + grade + degradês) ── */}
-      <div style={{ position: 'relative', height: '60vh', minHeight: 440, overflow: 'hidden', background: '#060e18' }}>
+      <div className="exp-hero" style={{ position: 'relative', height: '60vh', minHeight: 440, overflow: 'hidden', background: '#060e18' }}>
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
           <img src={imgUrl(exp.cover_image, 1600)} alt="" aria-hidden="true" fetchpriority="high" className="kenburns" style={{
             width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%',
@@ -288,16 +296,16 @@ export default function ExpeditionPage({ expedition, navigate }) {
             {heroYear && (
               <div style={{
                 fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontWeight: 700,
-                fontSize: 'clamp(24px, 3vw, 34px)', letterSpacing: '0.18em', lineHeight: 1, marginBottom: 10,
+                fontSize: 'clamp(22px, 3vw, 34px)', letterSpacing: '0.18em', lineHeight: 1, marginBottom: 8,
                 background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 width: 'fit-content',
               }}>
                 {heroYear}
               </div>
             )}
-            <h1 style={{
+            <h1 className="exp-hero-title" style={{
               fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic',
-              fontSize: 'clamp(48px, 8vw, 96px)', fontWeight: 900, textTransform: 'uppercase',
+              fontSize: 'clamp(44px, 8vw, 96px)', fontWeight: 900, textTransform: 'uppercase',
               letterSpacing: '0.02em', color: '#f1f5f9', margin: 0, lineHeight: 0.92,
             }}>
               {exp.name}
@@ -306,7 +314,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
           {exp.slogan && (
             <p className="exp-hero-slogan" style={{
               fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic',
-              fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, lineHeight: 1.1,
+              fontSize: 'clamp(24px, 4vw, 44px)', fontWeight: 700, lineHeight: 1.1,
               color: '#f1f5f9', margin: 0, textAlign: 'right', maxWidth: 520,
             }}>
               {exp.slogan}
@@ -317,26 +325,26 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
       {/* ── Highlight bar ── */}
       <div style={{ background: '#fff', borderBottom: `1px solid ${T.border}`, boxShadow: '0 2px 12px rgba(0,65,64,0.07)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px', display: 'flex', flexWrap: 'wrap' }}>
+        <div className="exp-highlights-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px', display: 'flex', flexWrap: 'wrap' }}>
           {highlights.map(({ id, Icon, label, value }, i) => (
-            <div key={id} style={{
+            <div key={id} className="exp-highlight-item" style={{
               flex: '1 1 200px',
-              display: 'flex', alignItems: 'center', gap: 16,
-              padding: '24px',
+              display: 'flex', alignItems: 'center', gap: 14,
+              padding: '22px 20px',
               borderRight: i < highlights.length - 1 ? `1px solid ${T.border}` : 'none',
             }}>
               {/* icon badge */}
-              <div style={{
-                width: 44, height: 44, borderRadius: 12,
+              <div className="exp-highlight-icon" style={{
+                width: 42, height: 42, borderRadius: 12,
                 background: 'rgba(155,200,169,0.12)',
                 border: '1.5px solid rgba(155,200,169,0.35)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <Icon size={20} color='#004140' strokeWidth={1.8} />
+                <Icon size={19} color='#004140' strokeWidth={1.8} />
               </div>
-              <div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: T.textMuted, marginBottom: 5 }}>{label}</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.2 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.textMuted, marginBottom: 4 }}>{label}</div>
+                <div className="exp-highlight-val" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.25 }}>
                   {id === 'vagas' && exp.spots_left != null && exp.spots_left <= 6
                     ? <span style={{ color: T.gold }}>{value}</span>
                     : value}
@@ -348,13 +356,13 @@ export default function ExpeditionPage({ expedition, navigate }) {
       </div>
 
       {/* ── Main content ── */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 32px 100px', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 48, alignItems: 'start' }}>
+      <div className="exp-main-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 32px 100px', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 48, alignItems: 'start' }}>
 
         {/* ── LEFT ── */}
-        <div>
+        <div style={{ minWidth: 0 }}>
 
           {/* About */}
-          <section style={{ marginBottom: 56 }}>
+          <section className="exp-section" style={{ marginBottom: 56 }}>
             <SectionTitle>{t('exp_sobre_titulo')}</SectionTitle>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: T.textMid, lineHeight: 1.85, margin: 0, whiteSpace: 'pre-wrap' }}>
               {exp.description}
@@ -362,7 +370,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
           </section>
 
           {/* Perfil do grupo (texto fixo) */}
-          <section style={{ marginBottom: 56 }}>
+          <section className="exp-section" style={{ marginBottom: 56 }}>
             <SectionTitle>{t('exp_perfil_titulo')}</SectionTitle>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: T.textMid, lineHeight: 1.85, margin: 0, whiteSpace: 'pre-wrap' }}>
               {t('exp_perfil_texto')}
@@ -371,32 +379,32 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Includes / Not Includes */}
           {(exp.included || exp.not_included) && (
-            <section style={{ marginBottom: 56 }}>
+            <section className="exp-section" style={{ marginBottom: 56 }}>
               <SectionTitle>{t('exp_incluso_titulo')}</SectionTitle>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20 }}>
                 {exp.included && (
-                  <div style={{ background: T.mintBg, border: `1px solid rgba(155,200,169,0.25)`, borderRadius: 16, padding: 24 }}>
+                  <div className="exp-card-pad" style={{ background: T.mintBg, border: `1px solid rgba(155,200,169,0.25)`, borderRadius: 16, padding: 24 }}>
                     <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.accent, margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
                       {t('exp_incluso_rotulo')}
                     </h4>
                     <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {exp.included.split(/\\n|\r?\n/).map(s => s.replace(/^[\s\p{Pd}\p{So}\p{Sm}•·∙⋅*▪▫▸▹►▻✓✔✅✗✘❌✖➖➕\uFE0E\uFE0F\u200B]+/u, '').trim()).filter(Boolean).map((item, i) => (
                         <li key={i} style={{ display: 'flex', gap: 10, fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMid, lineHeight: 1.4 }}>
-                          <Check size={14} color={T.accent} style={{ flexShrink: 0, marginTop: 2 }} /> {item}
+                          <Check size={14} color={T.accent} style={{ flexShrink: 0, marginTop: 2 }} /> <span>{item}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
                 {exp.not_included && (
-                  <div style={{ background: 'rgba(232,25,60,0.04)', border: `1px solid rgba(232,25,60,0.14)`, borderRadius: 16, padding: 24 }}>
+                  <div className="exp-card-pad" style={{ background: 'rgba(232,25,60,0.04)', border: `1px solid rgba(232,25,60,0.14)`, borderRadius: 16, padding: 24 }}>
                     <h4 style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.accent, margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
                       {t('exp_nao_incluso_rotulo')}
                     </h4>
                     <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {exp.not_included.split(/\\n|\r?\n/).map(s => s.replace(/^[\s\p{Pd}\p{So}\p{Sm}•·∙⋅*▪▫▸▹►▻✓✔✅✗✘❌✖➖➕\uFE0E\uFE0F\u200B]+/u, '').trim()).filter(Boolean).map((item, i) => (
                         <li key={i} style={{ display: 'flex', gap: 10, fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMid, lineHeight: 1.4 }}>
-                          <X size={14} color={T.accent} style={{ flexShrink: 0, marginTop: 2 }} /> {item}
+                          <X size={14} color={T.accent} style={{ flexShrink: 0, marginTop: 2 }} /> <span>{item}</span>
                         </li>
                       ))}
                     </ul>
@@ -408,7 +416,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Hospedagem */}
           {Array.isArray(exp.stays) && exp.stays.length > 0 && (
-            <section style={{ marginBottom: 56 }}>
+            <section className="exp-section" style={{ marginBottom: 56 }}>
               <SectionTitle>{t('exp_hospedagem_titulo')}</SectionTitle>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
@@ -433,9 +441,9 @@ export default function ExpeditionPage({ expedition, navigate }) {
           )}
 
           {/* Itinerary */}
-          <section style={{ marginBottom: 56 }}>
+          <section className="exp-section" style={{ marginBottom: 56 }}>
             <SectionTitle>{t('exp_roteiro_titulo')}</SectionTitle>
-            <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, padding: '0 28px', boxShadow: T.shadow }}>
+            <div className="exp-itinerary-card" style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, padding: '0 28px', boxShadow: T.shadow }}>
               {loadingDays ? (
                 <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMuted, padding: '24px 0' }}>{t('exp_roteiro_carregando')}</p>
               ) : dayGroups.length > 0 ? (
@@ -450,9 +458,9 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Gallery */}
           {exp.gallery_images && exp.gallery_images.length > 0 && (
-            <section>
+            <section className="exp-section">
               <SectionTitle>{t('exp_destino_titulo')}</SectionTitle>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              <div className="exp-gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                 {exp.gallery_images.map((img, i) => (
                   <div key={i} style={{ borderRadius: 12, overflow: 'hidden', aspectRatio: '4/3', boxShadow: T.shadow }}>
                     <img src={imgUrl(img, 800)} alt="Galeria" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', display: 'block' }}
@@ -467,7 +475,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
         </div>
 
         {/* ── RIGHT: sticky sidebar ── */}
-        <div style={{ position: 'sticky', top: 88 }}>
+        <div id="reservar" className="exp-sidebar" style={{ position: 'sticky', top: 88, scrollMarginTop: 84 }}>
           {/* price card */}
           <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: '28px 24px', boxShadow: T.shadowLg, marginBottom: 16 }}>
             {(installments || cashPrice) && (
@@ -543,30 +551,190 @@ export default function ExpeditionPage({ expedition, navigate }) {
         </div>
       </div>
 
+      {/* ── Barra fixa mobile (atalho rápido para reservar / WhatsApp) ── */}
+      <div className="exp-mobile-cta">
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            {installments ? t('exp_info_parcelas', { parcelas: installments.max }) : t('exp_info_a_vista')}
+          </div>
+          <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, color: T.accent, lineHeight: 1 }}>
+            {installments ? brl(installments.value) : (cashPrice ? brl(cashPrice) : t('preco_sob_consulta'))}
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            type="button"
+            onClick={scrollToForm}
+            style={{
+              padding: '11px 16px',
+              borderRadius: 10,
+              border: 'none',
+              background: T.accent,
+              color: '#fff',
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {t('form_titulo')}
+          </button>
+          <a
+            href={`https://wa.me/5531996158950?text=${encodeURIComponent(t('exp_whatsapp_mensagem', { nome: exp.name, datas: dateLabel }))}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              background: '#25D366',
+              color: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </a>
+        </div>
+      </div>
+
       {/* ── Responsive overrides ── */}
       <style>{`
+        .exp-mobile-cta {
+          display: none;
+        }
         @media (max-width: 900px) {
-          div[style*="grid-template-columns: minmax(0,1fr) 340px"] {
+          .exp-main-grid {
             grid-template-columns: 1fr !important;
+            gap: 36px !important;
+            padding: 36px 20px 64px !important;
           }
-          div[style*="position: sticky; top: 88px"] {
+          .exp-sidebar {
             position: static !important;
           }
-          div[style*="grid-template-columns: 1fr 1fr"] {
-            grid-template-columns: 1fr !important;
-          }
-          div[style*="grid-template-columns: repeat(3, 1fr)"] {
+          .exp-gallery-grid {
             grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
+          .exp-mobile-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 90;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0, 65, 64, 0.14);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            padding: 10px 18px calc(10px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
           }
         }
         @media (max-width: 768px) {
+          .exp-hero {
+            height: auto !important;
+            min-height: 360px !important;
+            display: flex !important;
+            align-items: flex-end !important;
+            padding-top: 96px !important;
+          }
           .exp-hero-content {
+            position: relative !important;
             flex-direction: column !important;
             align-items: flex-start !important;
-            gap: 16px !important;
-            padding: 0 24px 36px !important;
+            gap: 10px !important;
+            padding: 20px 20px 28px !important;
+            width: 100% !important;
           }
-          .exp-hero-slogan { text-align: left !important; }
+          .exp-hero-title {
+            font-size: clamp(38px, 11vw, 56px) !important;
+          }
+          .exp-hero-slogan {
+            text-align: left !important;
+            font-size: clamp(20px, 5.2vw, 28px) !important;
+            max-width: 100% !important;
+          }
+          .exp-highlights-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            padding: 0 !important;
+          }
+          .exp-highlight-item {
+            padding: 14px 14px !important;
+            gap: 10px !important;
+            border-right: none !important;
+            border-bottom: 1px solid rgba(0, 65, 64, 0.12) !important;
+          }
+          .exp-highlight-item:nth-child(odd) {
+            border-right: 1px solid rgba(0, 65, 64, 0.12) !important;
+          }
+          .exp-highlight-item:nth-last-child(-n+2) {
+            border-bottom: none !important;
+          }
+          .exp-highlight-icon {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 10px !important;
+          }
+          .exp-highlight-val {
+            font-size: 13px !important;
+          }
+          .exp-section {
+            margin-bottom: 40px !important;
+          }
+          .exp-card-pad {
+            padding: 18px !important;
+          }
+          .exp-itinerary-card {
+            padding: 0 16px !important;
+          }
+          .exp-day-title-wrap {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 2px !important;
+          }
+          .exp-day-subtitle {
+            margin-left: 0 !important;
+            font-size: 12px !important;
+          }
+          .exp-day-list {
+            margin: 0 0 18px 8px !important;
+            padding-left: 14px !important;
+            border-left: 2px solid rgba(0, 65, 64, 0.14) !important;
+          }
+          .exp-day-item {
+            flex-direction: column !important;
+            gap: 4px !important;
+          }
+          .exp-day-time {
+            min-width: 0 !important;
+            font-size: 12px !important;
+            padding-top: 0 !important;
+          }
+          .exp-day-time-empty {
+            display: none !important;
+          }
+        }
+        @media (max-width: 380px) {
+          .exp-highlights-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .exp-highlight-item {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(0, 65, 64, 0.12) !important;
+          }
+          .exp-highlight-item:last-child {
+            border-bottom: none !important;
+          }
         }
       `}</style>
 
@@ -578,7 +746,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
 /* ─── helpers ─── */
 function SectionTitle({ children }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
       <div style={{ width: 4, height: 28, borderRadius: 99, background: '#9bc8a9', flexShrink: 0 }} />
       <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', color: T.text, margin: 0, letterSpacing: '0.02em' }}>
         {children}

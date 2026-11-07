@@ -173,10 +173,14 @@ export default function ForWho() {
 
       <style>{`
         @media (max-width: 768px) {
+          #para-quem {
+            padding: 56px 20px 48px !important;
+          }
           .for-who-header {
             flex-direction: column !important;
             align-items: flex-start !important;
             gap: 12px !important;
+            margin-bottom: 28px !important;
           }
           .for-who-divider {
             display: none !important;

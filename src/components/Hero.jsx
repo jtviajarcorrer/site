@@ -23,7 +23,7 @@ export default function Hero({ navigate }) {
   };
 
   return (
-    <section style={{ position: 'relative', height: '100vh', minHeight: 600, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+    <section className="hero-section" style={{ position: 'relative', height: '100vh', minHeight: 600, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
 
       {/* BG */}
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
@@ -141,13 +141,12 @@ export default function Hero({ navigate }) {
           50%       { transform: translateY(5px); opacity: 1; }
         }
         @media (max-width: 768px) {
-          section > div:last-of-type { padding: 0 24px 56px !important; }
-          .hero-content {
+          .hero-section > .hero-content {
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
-            padding: 0 24px !important;
-            gap: 32px !important;
+            padding: 0 24px 56px !important;
+            gap: 28px !important;
           }
           .hero-logo-container img {
             width: 112px !important;

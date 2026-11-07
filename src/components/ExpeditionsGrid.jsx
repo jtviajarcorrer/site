@@ -28,7 +28,7 @@ function ExpeditionCard({ exp, navigate }) {
         border: isPast ? '1px dashed rgba(241,245,249,0.14)' : '1px solid rgba(155,200,169,0.1)',
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         display: 'flex', flexDirection: 'column',
-        width: expanded ? 340 : 268,
+        width: expanded ? 'min(340px, calc(100vw - 48px))' : 268,
         height: expanded ? 530 : 270,
         ...(isPast ? { filter: 'grayscale(1)', opacity: 0.4, userSelect: 'none' } : {}),
       }}
@@ -179,10 +179,11 @@ function ExpeditionCard({ exp, navigate }) {
   );
 }
 
-// Agrupa as expedições em linhas de até MAX_CARDS_PER_ROW (4) cards.
+// No desktop: agrupa as expedições em linhas de até MAX_CARDS_PER_ROW (4) cards.
 // Quando um ano termina com menos de 4 cards na linha (ex.: 2026 com 2 expedições),
 // o próximo ano (2027) começa na mesma linha ocupando os espaços restantes até completar 4.
-function buildTimelineRows(upcoming) {
+// No mobile (isMobile): mantém 1 linha horizontal deslizável por ano (2026, 2027).
+function buildTimelineRows(upcoming, isMobile = false) {
   const rows = [];
   const seenYears = new Set();
 
@@ -193,7 +194,12 @@ function buildTimelineRows(upcoming) {
     const month = rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1);
 
     let currentRow = rows[rows.length - 1];
-    if (!currentRow || currentRow.totalCards >= MAX_CARDS_PER_ROW) {
+    const lastSeg = currentRow?.segments[currentRow.segments.length - 1];
+    const shouldStartNewRow = isMobile
+      ? (!currentRow || (lastSeg && lastSeg.year !== year))
+      : (!currentRow || currentRow.totalCards >= MAX_CARDS_PER_ROW);
+
+    if (shouldStartNewRow) {
       currentRow = { segments: [], totalCards: 0 };
       rows.push(currentRow);
     }
@@ -455,6 +461,14 @@ function TimelineRow({ row, navigate }) {
 
 export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
   const { t, rich } = useT();
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   // Re-observa os .reveal quando os dados chegam (a timeline monta depois do carregamento)
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -463,7 +477,7 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
     );
     document.querySelectorAll('.reveal:not(.revealed)').forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, [loading, expeditions]);
+  }, [loading, expeditions, isMobile]);
 
   // Regra de exibição: somente expedições com "Destaque no Site" (highlight).
   // - Futuras/em andamento: cards normais.
@@ -482,7 +496,7 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
   const upcoming = [...lastPast, ...futureOnes]
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 
-  const timelineRows = buildTimelineRows(upcoming);
+  const timelineRows = buildTimelineRows(upcoming, isMobile);
 
   return (
     <section id="expedicoes" style={{ padding: '80px 24px', maxWidth: 1200, margin: '0 auto' }}>

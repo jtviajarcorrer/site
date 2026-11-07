@@ -19,8 +19,8 @@ export default function HomePage({ expeditions, loading, navigate }) {
       <ExpeditionsGrid expeditions={expeditions} loading={loading} navigate={navigate} />
 
       {/* Sobre a JT */}
-      <section id="sobre" style={{ padding: '100px 24px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 60, alignItems: 'flex-start' }}>
+      <section id="sobre" className="home-sobre-section" style={{ padding: '100px 24px' }}>
+        <div className="home-sobre-grid" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 60, alignItems: 'flex-start' }}>
           <div className="reveal">
 
             <h2 className="section-title">
@@ -73,6 +73,17 @@ export default function HomePage({ expeditions, loading, navigate }) {
       <Stats expeditions={expeditions} />
 
       <Footer navigate={navigate} />
+
+      <style>{`
+        @media (max-width: 768px) {
+          .home-sobre-section {
+            padding: 56px 20px !important;
+          }
+          .home-sobre-grid {
+            gap: 40px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -55,6 +55,16 @@ export default function HowItWorks() {
           })}
         </div>
       </div>
+      <style>{`
+        @media (max-width: 768px) {
+          #como-funciona {
+            padding: 56px 20px !important;
+          }
+          #como-funciona .reveal:first-child {
+            margin-bottom: 36px !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

@@ -102,7 +102,7 @@ export default function VideoCarousel() {
         <div key={activeVideo.id} className="video-card-enter" style={{ display: 'flex', alignItems: 'stretch', gap: 28, width: '100%', flexWrap: 'wrap' }}>
           
           {/* Carrossel de Destaque (Story Player) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0, width: 236 }}>
+          <div className="video-player-col" style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0, width: 236 }}>
             {/* Link acima do vídeo indicando os Destaques do Instagram */}
             <a
               href={activeVideo.instagramUrl || 'https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDE0MjkxNDk3NjkzNDA0?story_media_id=3515182905180088199&cplk=aXhpbTl5MTdnbXN2'}
@@ -447,7 +447,7 @@ export default function VideoCarousel() {
           </div>
 
           {/* Traveler Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: '1 1 240px', paddingTop: 38 }}>
+          <div className="video-info-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: '1 1 240px', paddingTop: 38 }}>
             <div>
               <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 32, fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.02em', lineHeight: 1 }}>
                 {activeVideo.name}
@@ -460,6 +460,7 @@ export default function VideoCarousel() {
               </p>
             </div>
             <div
+              className="video-nps-card"
               style={{ 
                 marginTop: 20,
                 alignSelf: 'flex-end',
@@ -502,6 +503,18 @@ export default function VideoCarousel() {
         }
         .video-card-enter {
           animation: fadeInScale 0.4s ease-out forwards;
+        }
+        @media (max-width: 640px) {
+          .video-player-col {
+            margin: 0 auto !important;
+          }
+          .video-info-col {
+            padding-top: 4px !important;
+          }
+          .video-nps-card {
+            align-self: stretch !important;
+            max-width: 100% !important;
+          }
         }
       `}</style>
     </div>
