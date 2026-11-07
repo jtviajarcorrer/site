@@ -207,6 +207,18 @@ export default function ExpeditionPage({ expedition, navigate }) {
   const { t } = useT();
   const [days, setDays] = useState([]);
   const [loadingDays, setLoadingDays] = useState(true);
+  const [formVisible, setFormVisible] = useState(false);
+
+  useEffect(() => {
+    const el = document.getElementById('reservar');
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setFormVisible(entry.isIntersecting),
+      { threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   useEffect(() => {
     async function fetchDays() {
@@ -507,7 +519,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
               </div>
             )}
 
-            <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 20, marginBottom: 20 }}>
+            <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 20 }}>
               <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 22, fontWeight: 900, textTransform: 'uppercase', color: '#dab83f', margin: '0 0 4px' }}>
                 {t('form_titulo')}
               </h3>
@@ -517,23 +529,6 @@ export default function ExpeditionPage({ expedition, navigate }) {
               <LeadForm expedition={exp} />
             </div>
           </div>
-
-          {/* WhatsApp */}
-          <a
-            href={`https://wa.me/5531996158950?text=${encodeURIComponent(t('exp_whatsapp_mensagem', { nome: exp.name, datas: dateLabel }))}`}
-            target="_blank" rel="noopener noreferrer"
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              padding: '14px', borderRadius: 12, background: '#25D366',
-              color: '#fff', fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 600,
-              textDecoration: 'none', transition: 'filter 0.2s', boxShadow: '0 4px 14px rgba(37,211,102,0.3)',
-            }}
-            onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.08)'}
-            onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            {t('exp_whatsapp_botao')}
-          </a>
 
           {/* trust signals */}
           <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -551,57 +546,40 @@ export default function ExpeditionPage({ expedition, navigate }) {
         </div>
       </div>
 
-      {/* ── Barra fixa mobile (atalho rápido para reservar / WhatsApp) ── */}
-      <div className="exp-mobile-cta">
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            {installments ? t('exp_info_parcelas', { parcelas: installments.max }) : t('exp_info_a_vista')}
+      {/* ── Barra fixa mobile (atalho rápido para o formulário, oculta quando o formulário já está na tela) ── */}
+      {!formVisible && (
+        <div className="exp-mobile-cta">
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {installments ? t('exp_info_parcelas', { parcelas: installments.max }) : t('exp_info_a_vista')}
+            </div>
+            <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, color: T.accent, lineHeight: 1 }}>
+              {installments ? brl(installments.value) : (cashPrice ? brl(cashPrice) : t('preco_sob_consulta'))}
+            </div>
           </div>
-          <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, color: T.accent, lineHeight: 1 }}>
-            {installments ? brl(installments.value) : (cashPrice ? brl(cashPrice) : t('preco_sob_consulta'))}
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             type="button"
             onClick={scrollToForm}
             style={{
-              padding: '11px 16px',
+              padding: '12px 20px',
               borderRadius: 10,
               border: 'none',
               background: T.accent,
               color: '#fff',
               fontFamily: "'Inter', sans-serif",
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
-            }}
-          >
-            {t('form_titulo')}
-          </button>
-          <a
-            href={`https://wa.me/5531996158950?text=${encodeURIComponent(t('exp_whatsapp_mensagem', { nome: exp.name, datas: dateLabel }))}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="WhatsApp"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: '#25D366',
-              color: '#fff',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              textDecoration: 'none',
-              flexShrink: 0,
+              gap: 6,
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          </a>
+            {t('form_botao')} <ChevronRight size={15} />
+          </button>
         </div>
-      </div>
+      )}
 
       {/* ── Responsive overrides ── */}
       <style>{`

@@ -597,7 +597,7 @@
     "key": "form_titulo",
     "group": "Formulário",
     "where": "Título do formulário de inscrição",
-    "text": "Reserve sua vaga"
+    "text": "Quero saber mais"
   },
   {
     "key": "form_subtitulo",
@@ -633,7 +633,7 @@
     "key": "form_botao",
     "group": "Formulário",
     "where": "Botão de envio",
-    "text": "Quero me inscrever"
+    "text": "Quero saber mais"
   },
   {
     "key": "form_enviando",
