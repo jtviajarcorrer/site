@@ -273,7 +273,7 @@ function TimelineRow({ row, navigate, isMobile = false }) {
   const rowGap = isMobile ? 12 : 24;
 
   return (
-    <div className="reveal year-block" style={{ position: 'relative' }}>
+    <div className="reveal reveal-zoom year-block" style={{ position: 'relative' }}>
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -488,13 +488,21 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Re-observa os .reveal quando os dados chegam (a timeline monta depois do carregamento)
+  // Observa todos os blocos .reveal e anima sempre que o usuário entra na seção
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); observer.unobserve(e.target); } }),
-      { threshold: 0.1 }
+      entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting && e.intersectionRatio >= 0.1) {
+            e.target.classList.add('revealed');
+          } else if (!e.isIntersecting && e.intersectionRatio === 0) {
+            e.target.classList.remove('revealed');
+          }
+        });
+      },
+      { threshold: [0, 0.1, 0.2] }
     );
-    document.querySelectorAll('.reveal:not(.revealed)').forEach(el => observer.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, [loading, expeditions, isMobile]);
 
@@ -519,7 +527,7 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
 
   return (
     <section id="expedicoes" data-analytics-section="expedicoes" style={{ padding: isMobile ? '40px 20px' : '64px 24px', maxWidth: 1200, margin: '0 auto' }}>
-      <div className="reveal expedition-header" style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: isMobile ? 20 : 32 }}>
+      <div className="reveal reveal-left expedition-header" style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: isMobile ? 20 : 32 }}>
         <div>
 
           <h2 className="section-title" style={{ margin: 0 }}>

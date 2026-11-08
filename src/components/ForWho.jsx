@@ -27,7 +27,7 @@ export default function ForWho() {
     if (photos.length <= 1 || paused) return;
     const timer = setInterval(() => {
       setIdx((prev) => (prev + 1) % photos.length);
-    }, 3500);
+    }, 2000);
     return () => clearInterval(timer);
   }, [photos.length, paused]);
 
@@ -57,211 +57,275 @@ export default function ForWho() {
       id="para-quem"
       data-analytics-section="para_quem"
       style={{
-        padding: '48px 24px 72px',
-        maxWidth: 1100,
+        padding: '24px 24px 48px',
+        maxWidth: 1200,
         margin: '0 auto',
       }}
     >
-      <div style={{ maxWidth: 820, margin: '0 auto' }}>
-        <h2 className="section-title" style={{ marginBottom: 24 }}>
-          {rich('para_quem_titulo', ['#dab83f', '#9bc8a9'])}
-        </h2>
-
-        <p
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 16,
-            color: 'rgba(241,245,249,0.6)',
-            lineHeight: 1.75,
-            margin: '0 0 16px',
-          }}
-        >
-          {t('para_quem_paragrafo_1')}
-        </p>
-
-        <p
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 16,
-            color: 'rgba(241,245,249,0.6)',
-            lineHeight: 1.75,
-            margin: '0 0 16px',
-          }}
-        >
-          {t('para_quem_paragrafo_2')}
-        </p>
-
-        <p
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 16,
-            color: 'rgba(241,245,249,0.6)',
-            lineHeight: 1.75,
-            margin: '0 0 36px',
-          }}
-        >
-          {t('para_quem_paragrafo_3')}
-        </p>
-      </div>
-
-      {photos.length > 0 && (
+      <div
+        className="for-who-showcase"
+        style={{
+          position: 'relative',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderRadius: 20,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Coluna de Texto à Esquerda (sobrepõe apenas a bordinha inicial da foto) */}
         <div
-          className="reveal for-who-photo-wrap"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
+          className="reveal reveal-left for-who-text-box"
           style={{
             position: 'relative',
-            width: '100%',
-            maxWidth: 820,
-            margin: '0 auto',
-            borderRadius: 20,
-            overflow: 'hidden',
-            border: '1px solid rgba(155,200,169,0.14)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
-            aspectRatio: '1640 / 924',
-            background: '#080d18',
-            userSelect: 'none',
+            zIndex: 3,
+            width: '45%',
+            flexShrink: 0,
+            padding: '32px 16px 32px 8px',
           }}
         >
-          {photos.map((src, i) => {
-            const active = i === idx;
-            return (
-              <img
-                key={src + i}
-                src={imgUrl(src, 1280)}
-                alt={`Perfil dos viajantes JT ${i + 1}`}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center center',
-                  display: 'block',
-                  opacity: active ? 1 : 0,
-                  transform: active ? 'scale(1)' : 'scale(1.02)',
-                  transition: 'opacity 0.65s ease-in-out, transform 0.65s ease-in-out',
-                  pointerEvents: active ? 'auto' : 'none',
-                }}
-              />
-            );
-          })}
-
-          <div
+          <h2
+            className="section-title"
             style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to top, rgba(6,17,26,0.5) 0%, transparent 35%)',
-              pointerEvents: 'none',
+              marginBottom: 20,
+              textShadow: '0 4px 24px rgba(0,0,0,0.6)',
             }}
-          />
+          >
+            {rich('para_quem_titulo', ['#dab83f', '#9bc8a9'])}
+          </h2>
 
-          {photos.length > 1 && (
-            <>
-              <button
-                type="button"
-                aria-label="Foto anterior"
-                onClick={prev}
-                style={{
-                  position: 'absolute',
-                  left: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: 34,
-                  height: 34,
-                  borderRadius: '50%',
-                  border: '1px solid rgba(218,184,63,0.45)',
-                  background: 'rgba(6,17,26,0.65)',
-                  backdropFilter: 'blur(6px)',
-                  color: '#dab83f',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  zIndex: 3,
-                }}
-              >
-                <ChevronLeft size={18} />
-              </button>
+          <p
+            style={{
+              fontFamily: "'Alumni Sans', sans-serif",
+              fontStyle: 'italic',
+              fontSize: 22,
+              fontWeight: 400,
+              letterSpacing: '0.04em',
+              color: 'rgba(241,245,249,0.88)',
+              lineHeight: 1.3,
+              margin: '0 0 14px',
+              textShadow: '0 2px 14px rgba(0,0,0,0.75)',
+            }}
+          >
+            {t('para_quem_paragrafo_1')}
+          </p>
 
-              <button
-                type="button"
-                aria-label="Próxima foto"
-                onClick={next}
-                style={{
-                  position: 'absolute',
-                  right: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: 34,
-                  height: 34,
-                  borderRadius: '50%',
-                  border: '1px solid rgba(218,184,63,0.45)',
-                  background: 'rgba(6,17,26,0.65)',
-                  backdropFilter: 'blur(6px)',
-                  color: '#dab83f',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  zIndex: 3,
-                }}
-              >
-                <ChevronRight size={18} />
-              </button>
+          <p
+            style={{
+              fontFamily: "'Alumni Sans', sans-serif",
+              fontStyle: 'italic',
+              fontSize: 22,
+              fontWeight: 400,
+              letterSpacing: '0.04em',
+              color: 'rgba(241,245,249,0.82)',
+              lineHeight: 1.3,
+              margin: '0 0 14px',
+              textShadow: '0 2px 14px rgba(0,0,0,0.75)',
+            }}
+          >
+            {t('para_quem_paragrafo_2')}
+          </p>
 
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 12,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  zIndex: 3,
-                  background: 'rgba(6,17,26,0.55)',
-                  backdropFilter: 'blur(6px)',
-                  padding: '5px 10px',
-                  borderRadius: 99,
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-              >
-                {photos.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    aria-label={`Ir para foto ${i + 1}`}
-                    onClick={() => setIdx(i)}
-                    style={{
-                      width: i === idx ? 18 : 6,
-                      height: 6,
-                      borderRadius: 99,
-                      border: 'none',
-                      padding: 0,
-                      background: i === idx ? '#dab83f' : 'rgba(241,245,249,0.4)',
-                      transition: 'all 0.25s ease',
-                      cursor: 'pointer',
-                    }}
-                  />
-                ))}
-              </div>
-            </>
-          )}
+          <p
+            style={{
+              fontFamily: "'Alumni Sans', sans-serif",
+              fontStyle: 'italic',
+              fontSize: 22,
+              fontWeight: 600,
+              letterSpacing: '0.04em',
+              color: '#9bc8a9',
+              lineHeight: 1.3,
+              margin: 0,
+              textShadow: '0 2px 14px rgba(0,0,0,0.75)',
+            }}
+          >
+            {t('para_quem_paragrafo_3')}
+          </p>
         </div>
-      )}
+
+        {/* Camada de Fotos à Direita mantendo proporção 16:9 inteira e degradê curto apenas na borda esquerda */}
+        {photos.length > 0 && (
+          <div
+            className="reveal reveal-right for-who-photo-stage"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            style={{
+              position: 'relative',
+              width: '60%',
+              marginLeft: '-5%',
+              aspectRatio: '1640 / 924',
+              borderRadius: 18,
+              overflow: 'hidden',
+              userSelect: 'none',
+              zIndex: 1,
+              flexShrink: 0,
+            }}
+          >
+            {photos.map((src, i) => {
+              const active = i === idx;
+              return (
+                <img
+                  key={src + i}
+                  src={imgUrl(src, 1400)}
+                  alt={`Perfil dos viajantes JT ${i + 1}`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center center',
+                    display: 'block',
+                    filter: 'brightness(0.75) contrast(1.04)',
+                    opacity: active ? 1 : 0,
+                    transform: active ? 'scale(1)' : 'scale(1.04)',
+                    transition: 'opacity 0.9s ease-in-out, transform 3.8s ease-out',
+                    pointerEvents: active ? 'auto' : 'none',
+                  }}
+                />
+              );
+            })}
+
+            {/* Degradê curto apenas na bordinha esquerda (0% -> 18%) + película escura suave no resto */}
+            <div
+              className="for-who-fade-left"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background:
+                  'linear-gradient(90deg, var(--jt-bg) 0%, rgba(6,17,26,0.82) 7%, rgba(6,17,26,0.32) 18%, rgba(6,17,26,0.28) 100%)',
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* Controles discretos do carrossel no canto inferior direito da imagem */}
+            {photos.length > 1 && (
+              <div
+                className="for-who-controls"
+                style={{
+                  position: 'absolute',
+                  bottom: 22,
+                  right: 28,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  zIndex: 4,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    background: 'rgba(6,17,26,0.65)',
+                    backdropFilter: 'blur(8px)',
+                    padding: '6px 12px',
+                    borderRadius: 99,
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  {photos.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Ir para foto ${i + 1}`}
+                      onClick={() => setIdx(i)}
+                      style={{
+                        width: i === idx ? 20 : 6,
+                        height: 6,
+                        borderRadius: 99,
+                        border: 'none',
+                        padding: 0,
+                        background: i === idx ? '#dab83f' : 'rgba(241,245,249,0.4)',
+                        transition: 'all 0.25s ease',
+                        cursor: 'pointer',
+                      }}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Foto anterior"
+                  onClick={prev}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(218,184,63,0.4)',
+                    background: 'rgba(6,17,26,0.7)',
+                    backdropFilter: 'blur(6px)',
+                    color: '#dab83f',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  aria-label="Próxima foto"
+                  onClick={next}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(218,184,63,0.4)',
+                    background: 'rgba(6,17,26,0.7)',
+                    backdropFilter: 'blur(6px)',
+                    color: '#dab83f',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <style>{`
-        @media (max-width: 768px) {
-          #para-quem {
-            padding: 24px 20px 44px !important;
+        @media (max-width: 860px) {
+          .for-who-showcase {
+            flex-direction: column !important;
           }
-          .for-who-photo-wrap {
-            border-radius: 16px !important;
+          .for-who-photo-stage {
+            width: 100% !important;
+            margin-left: 0 !important;
+            aspect-ratio: 1640 / 924 !important;
+            order: 1 !important;
+          }
+          .for-who-fade-left {
+            background: linear-gradient(
+              to top,
+              var(--jt-bg) 0%,
+              rgba(6,17,26,0.75) 16%,
+              rgba(6,17,26,0.22) 45%,
+              rgba(6,17,26,0.22) 100%
+            ) !important;
+          }
+          .for-who-controls {
+            bottom: 14px !important;
+            right: 16px !important;
+          }
+          .for-who-text-box {
+            order: 2 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 4px 16px !important;
+            margin-top: -18px !important;
           }
         }
       `}</style>

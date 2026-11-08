@@ -25,9 +25,9 @@ export default function HomePage({ expeditions, loading, navigate }) {
       <ExpeditionsGrid expeditions={expeditions} loading={loading} navigate={navigate} />
 
       {/* Sobre a JT */}
-      <section id="sobre" data-analytics-section="sobre" className="home-sobre-section" style={{ padding: '64px 24px 36px' }}>
+      <section id="sobre" data-analytics-section="sobre" className="home-sobre-section" style={{ padding: '64px 24px 36px', overflow: 'hidden' }}>
         <div className="home-sobre-grid" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 60, alignItems: 'flex-start' }}>
-          <div className="reveal">
+          <div className="reveal reveal-left">
 
             <h2 className="section-title">
               {rich('sobre_titulo', ['#9bc8a9', '#dab83f'])}
@@ -60,7 +60,7 @@ export default function HomePage({ expeditions, loading, navigate }) {
           </div>
 
           {/* Visual side: Videos */}
-          <div className="reveal" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="reveal reveal-right" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
               <h3 className="section-title" style={{ marginBottom: 8 }}>
                 {rich('recomenda_titulo', ['#dab83f'])}

@@ -13,12 +13,28 @@ export default function Footer({ navigate }) {
     </svg>
   );
 
+  const CompassIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+    </svg>
+  );
+
+  const goToExpeditions = () => {
+    const el = document.querySelector('#expedicoes');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (navigate) {
+      navigate('/#expedicoes');
+    }
+  };
+
   return (
     <footer id="contato" data-analytics-section="contato" style={{ borderTop: '1px solid rgba(155,200,169,0.08)', padding: '24px 24px 32px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
         {/* Final CTA */}
-        <div style={{ textAlign: 'center', padding: '64px 24px', background: '#004140', border: '1px solid rgba(155,200,169,0.2)', borderRadius: 28, marginBottom: 60 }}>
+        <div className="reveal reveal-zoom" style={{ textAlign: 'center', padding: '64px 24px', background: '#004140', border: '1px solid rgba(155,200,169,0.2)', borderRadius: 28, marginBottom: 60 }}>
           <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 900, textTransform: 'uppercase', color: '#f1f5f9', lineHeight: 0.95, letterSpacing: '0.02em', margin: '0 0 16px' }}>
             {rich('rodape_titulo', ['#dab83f'])}
           </h2>
@@ -31,10 +47,19 @@ export default function Footer({ navigate }) {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={goToExpeditions}
+              style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, background: '#dab83f', color: '#06111a', fontFamily: "'Inter', sans-serif", fontWeight: 700, transition: 'opacity 0.2s, transform 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <CompassIcon /> {t('rodape_botao_expedicoes')}
+            </button>
             <a href="https://wa.me/5531996158950" target="_blank" rel="noopener noreferrer"
-              style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: '#dab83f', color: '#06111a', fontFamily: "'Inter', sans-serif", fontWeight: 700, transition: 'opacity 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: 'transparent', border: '1.5px solid rgba(155,200,169,0.5)', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontWeight: 600, transition: 'border-color 0.2s, color 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#9bc8a9'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(155,200,169,0.5)'; e.currentTarget.style.color = '#9bc8a9'; }}
             >
               <WhatsAppIcon /> {t('rodape_botao_whatsapp')}
             </a>

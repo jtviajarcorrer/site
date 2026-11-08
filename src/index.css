@@ -148,15 +148,32 @@
   border-color: rgba(155, 200, 169, 0.55);
 }
 
-/* Scroll reveal */
+/* Scroll reveal — animações de movimento ao entrar em cada seção */
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translate3d(0, 44px, 0) scale(0.985);
+  filter: blur(4px);
+  transition:
+    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  will-change: opacity, transform, filter;
+}
+.reveal.reveal-left {
+  transform: translate3d(-56px, 16px, 0) scale(0.985);
+}
+.reveal.reveal-right {
+  transform: translate3d(56px, 16px, 0) scale(0.975);
+}
+.reveal.reveal-zoom {
+  transform: translate3d(0, 36px, 0) scale(0.94);
 }
 .reveal.revealed {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0px);
 }
 
 /* Títulos de Seção Padronizados */

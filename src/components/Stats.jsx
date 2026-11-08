@@ -6,8 +6,11 @@ import { imgUrl } from '../utils/img.js';
 function AnimatedNumber({ target, suffix, started }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
-    if (!started) return;
-    const duration = 1800, steps = 60, increment = target / steps;
+    if (!started) {
+      setDisplay(0);
+      return;
+    }
+    const duration = 1600, steps = 50, increment = target / steps;
     let current = 0;
     const timer = setInterval(() => {
       current += increment;
@@ -116,12 +119,13 @@ export default function Stats({ expeditions = [] }) {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.18) {
           setStarted(true);
-          observer.disconnect();
+        } else if (!entry.isIntersecting && entry.intersectionRatio === 0) {
+          setStarted(false);
         }
       },
-      { threshold: 0.3 }
+      { threshold: [0, 0.18] }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
@@ -229,9 +233,9 @@ export default function Stats({ expeditions = [] }) {
           {stats.map((stat, i) => (
             <div
               key={stat.id}
-              className="reveal stats-card"
+              className="reveal reveal-zoom stats-card"
               style={{
-                transitionDelay: `${i * 100}ms`,
+                transitionDelay: `${i * 110}ms`,
                 textAlign: 'center',
                 padding: '32px 24px',
                 background:
@@ -243,7 +247,6 @@ export default function Stats({ expeditions = [] }) {
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-                transition: 'transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';

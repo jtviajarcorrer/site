@@ -44,14 +44,16 @@ export default function Hero({ navigate }) {
           zIndex: 1,
         }} />
         
-        {/* Overlay escuro nas bordas, fundindo com a página */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to top, rgba(6,14,24,1) 0%, rgba(6,14,24,0.6) 40%, rgba(6,14,24,0.2) 70%, rgba(8,13,24,0.5) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to right, rgba(6,14,24,0.8) 0%, transparent 50%, rgba(6,14,24,0.4) 100%)' }} />
+        {/* Overlay escuro nas bordas, fundindo com a página (#06111a) */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to top, #06111a 0%, rgba(6,17,26,0.82) 16%, rgba(6,17,26,0.55) 42%, rgba(6,17,26,0.2) 72%, rgba(6,17,26,0.5) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to right, rgba(6,17,26,0.8) 0%, transparent 50%, rgba(6,17,26,0.4) 100%)' }} />
+        {/* Degradê inferior de integração suave com a primeira seção */}
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 110, zIndex: 2, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(6,17,26,0) 0%, rgba(6,17,26,0.72) 55%, #06111a 100%)' }} />
       </div>
 
       {/* Conteúdo — ancorado na parte de baixo, lado esquerdo */}
       <div className="hero-content" style={{
-        position: 'relative', zIndex: 2,
+        position: 'relative', zIndex: 3,
         width: '100%', maxWidth: 1200, margin: '0 auto',
         padding: '0 56px',
         display: 'flex',
@@ -117,25 +119,7 @@ export default function Hero({ navigate }) {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <button
-        onClick={scrollToExpeditions}
-        className="scroll-indicator"
-        style={{
-          position: 'absolute', bottom: 28, right: 56,
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: 'rgba(218,184,63,0.4)', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', gap: 4, transition: 'color 0.2s', zIndex: 3,
-        }}
-        onMouseEnter={e => e.currentTarget.style.color = 'rgba(218,184,63,0.85)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'rgba(218,184,63,0.4)'}
-      >
-        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' }}>scroll</span>
-        <ChevronDown size={15} style={{ animation: 'bounce 2s infinite' }} />
-      </button>
-
       <style>{`
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
         @keyframes pulse-down {
           0%, 100% { transform: translateY(0); opacity: 0.75; }
           50%       { transform: translateY(5px); opacity: 1; }
@@ -161,11 +145,6 @@ export default function Hero({ navigate }) {
           }
           .hero-main-text {
             text-align: center !important;
-          }
-          .scroll-indicator {
-            bottom: 14px !important;
-            right: 50% !important;
-            transform: translateX(50%) !important;
           }
         }
       `}</style>

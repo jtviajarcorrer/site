@@ -324,6 +324,12 @@
     "text": "Sentimos muito caso o destino escolhido já esteja esgotado! Por isso, recomendamos que você reserve sua vaga com antecedência e garanta a oportunidade de viver essa experiência com a gente. Vamos adorar ter você nessa turma!"
   },
   {
+    "key": "rodape_botao_expedicoes",
+    "group": "Rodapé",
+    "where": "Chamada final - 1º botão (leva para a seção de expedições)",
+    "text": "Escolha sua expedição"
+  },
+  {
     "key": "rodape_botao_whatsapp",
     "group": "Rodapé",
     "where": "Chamada final - botão",
