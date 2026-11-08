@@ -62,8 +62,8 @@
   {
     "key": "para_quem_foto",
     "group": "Perfil dos Viajantes (Home)",
-    "where": "Home - Perfil dos Viajantes - Foto abaixo do texto (subir na coluna Imagem ou colar link em Texto)",
-    "text": "/hero.jpg"
+    "where": "Home - Perfil dos Viajantes - Fotos do carrossel abaixo do texto (subir na coluna Imagem)",
+    "text": "https://uirisymiorgkqjhygmmp.supabase.co/storage/v1/object/public/expedition-media/site/3373872988.png\nhttps://uirisymiorgkqjhygmmp.supabase.co/storage/v1/object/public/expedition-media/site/3373872983.png\nhttps://uirisymiorgkqjhygmmp.supabase.co/storage/v1/object/public/expedition-media/site/3373872987.png\nhttps://uirisymiorgkqjhygmmp.supabase.co/storage/v1/object/public/expedition-media/site/3373872977.png\nhttps://uirisymiorgkqjhygmmp.supabase.co/storage/v1/object/public/expedition-media/site/3373872971.png\nhttps://uirisymiorgkqjhygmmp.supabase.co/storage/v1/object/public/expedition-media/site/3373873020.png\nhttps://uirisymiorgkqjhygmmp.supabase.co/storage/v1/object/public/expedition-media/site/3373873034.png"
   },
   {
     "key": "expedicoes_titulo",
