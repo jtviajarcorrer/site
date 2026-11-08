@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Users, Clock, CheckCircle2, XCircle, AlertTriangle, RefreshCw,
-  Smartphone, Monitor, TrendingUp, MousePointerClick, ArrowLeft, Filter, Eye
+  Smartphone, Monitor, TrendingUp, MousePointerClick, ArrowLeft, Filter, Eye, Lock, LogOut
 } from 'lucide-react';
 import { supabase } from '../supabaseClient.js';
+
+const PWD_STORAGE_KEY = 'jt_analytics_pwd_v1';
 
 const EXPEDITION_SECTIONS = [
   { id: 'hero',       label: '1. Topo / Capa da Expedição' },
@@ -54,33 +56,62 @@ function pct(part, total) {
 }
 
 export default function AnalyticsPage({ expeditions = [], navigate }) {
+  const [savedPwd, setSavedPwd] = useState(() => {
+    try { return sessionStorage.getItem(PWD_STORAGE_KEY) || ''; } catch { return ''; }
+  });
+  const [pwdInput, setPwdInput] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
+
   const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [daysFilter, setDaysFilter] = useState('7'); // '1' | '7' | '30' | 'all'
   const [pageFilter, setPageFilter] = useState('all_expeditions'); // 'all_expeditions' | 'home' | 'all' | slug
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (pwdToUse = savedPwd) => {
+    if (!pwdToUse) return;
     setLoading(true);
-    let q = supabase
-      .from('analytics_sessions')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(2000);
+    setAuthError('');
+    const daysParam = daysFilter === 'all' ? null : (parseInt(daysFilter, 10) || 7);
 
-    if (daysFilter !== 'all') {
-      const days = parseInt(daysFilter, 10) || 7;
-      const since = new Date(Date.now() - days * 86400000).toISOString();
-      q = q.gte('created_at', since);
+    const { data, error } = await supabase.rpc('get_analytics_sessions', {
+      p_password: pwdToUse,
+      p_days: daysParam,
+    });
+
+    if (error) {
+      setAuthenticated(false);
+      setSavedPwd('');
+      try { sessionStorage.removeItem(PWD_STORAGE_KEY); } catch {}
+      setAuthError('Senha incorreta.');
+    } else {
+      setAuthenticated(true);
+      setSavedPwd(pwdToUse);
+      try { sessionStorage.setItem(PWD_STORAGE_KEY, pwdToUse); } catch {}
+      setSessions(Array.isArray(data) ? data : []);
     }
-
-    const { data, error } = await q;
-    if (!error && data) setSessions(data);
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    if (savedPwd) {
+      fetchAnalytics(savedPwd);
+    }
   }, [daysFilter]);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (!pwdInput.trim()) return;
+    fetchAnalytics(pwdInput.trim());
+  };
+
+  const handleLogout = () => {
+    setAuthenticated(false);
+    setSavedPwd('');
+    setPwdInput('');
+    setSessions([]);
+    try { sessionStorage.removeItem(PWD_STORAGE_KEY); } catch {}
+  };
 
   const expeditionOptions = useMemo(() => {
     const map = new Map();
@@ -234,6 +265,80 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
     padding: '20px 22px',
   };
 
+  if (!authenticated) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#06111a', color: '#f1f5f9', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div style={{ width: '100%', maxWidth: 380, background: 'rgba(13, 25, 38, 0.92)', border: '1px solid rgba(218, 184, 63, 0.25)', borderRadius: 22, padding: '32px 26px', boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}>
+          <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(218,184,63,0.14)', border: '1px solid rgba(218,184,63,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <Lock size={24} color="#dab83f" />
+          </div>
+          <h1 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 32, fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', color: '#f1f5f9', margin: '0 0 6px', lineHeight: 1 }}>
+            Acesso de Gestores
+          </h1>
+          <p style={{ fontSize: 13, color: 'rgba(241,245,249,0.6)', textAlign: 'center', margin: '0 0 22px' }}>
+            Digite a senha para visualizar o painel de comportamento das landing pages.
+          </p>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <input
+              type="password"
+              autoFocus
+              placeholder="Senha de acesso"
+              value={pwdInput}
+              onChange={(e) => { setPwdInput(e.target.value); setAuthError(''); }}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(155,200,169,0.28)',
+                borderRadius: 12,
+                padding: '13px 16px',
+                color: '#f1f5f9',
+                fontSize: 15,
+                outline: 'none',
+              }}
+            />
+            {authError && (
+              <div style={{ fontSize: 12.5, color: '#f87171', textAlign: 'center', fontWeight: 600 }}>
+                {authError}
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                padding: '13px 16px',
+                borderRadius: 12,
+                border: 'none',
+                background: '#dab83f',
+                color: '#06111a',
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+            >
+              {loading ? 'Verificando...' : 'Entrar no Painel'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              style={{
+                padding: '10px',
+                borderRadius: 10,
+                border: 'none',
+                background: 'transparent',
+                color: 'rgba(241,245,249,0.55)',
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              Voltar para o site
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#06111a', color: '#f1f5f9', fontFamily: "'Inter', sans-serif", paddingBottom: 80 }}>
       {/* Top Bar */}
@@ -303,10 +408,18 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
             </div>
 
             <button
-              onClick={fetchAnalytics}
+              onClick={() => fetchAnalytics(savedPwd)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(218,184,63,0.14)', border: '1px solid rgba(218,184,63,0.35)', color: '#dab83f', borderRadius: 10, padding: '8px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
             >
               <RefreshCw size={14} /> Atualizar
+            </button>
+
+            <button
+              onClick={handleLogout}
+              title="Bloquear painel"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.28)', color: '#f87171', borderRadius: 10, padding: '8px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+            >
+              <LogOut size={14} /> Sair
             </button>
           </div>
         </div>
