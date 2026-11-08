@@ -62,7 +62,7 @@ export default function ForWho() {
         margin: '0 auto',
       }}
     >
-      <div style={{ maxWidth: 780 }}>
+      <div style={{ maxWidth: 820, margin: '0 auto' }}>
         <h2 className="section-title" style={{ marginBottom: 24 }}>
           {rich('para_quem_titulo', ['#dab83f', '#9bc8a9'])}
         </h2>
@@ -114,7 +114,8 @@ export default function ForWho() {
           style={{
             position: 'relative',
             width: '100%',
-            maxWidth: 780,
+            maxWidth: 820,
+            margin: '0 auto',
             borderRadius: 20,
             overflow: 'hidden',
             border: '1px solid rgba(155,200,169,0.14)',
