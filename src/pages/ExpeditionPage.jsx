@@ -135,7 +135,7 @@ function LeadForm({ expedition }) {
 }
 
 /* ─── Itinerary Day (accordion) ─── */
-function DayItem({ g, defaultOpen = false }) {
+function DayItem({ g, defaultOpen = false, isLast = false }) {
   const { t } = useT();
   const [open, setOpen] = useState(defaultOpen);
   const dateObj = g.date ? new Date(g.date + 'T12:00:00Z') : null;
@@ -146,7 +146,7 @@ function DayItem({ g, defaultOpen = false }) {
   const title = hasNumber ? t('exp_roteiro_dia', { n: g.number }) : t('exp_roteiro_antes');
   const subtitle = dateObj ? `${cap(weekday)}, ${dateText}` : '';
   return (
-    <div style={{ borderBottom: `1px solid ${T.border}` }}>
+    <div style={{ borderBottom: isLast ? 'none' : `1px solid ${T.border}` }}>
       <button className="exp-day-btn" onClick={() => setOpen(o => !o)} style={{
         width: '100%', background: 'none', border: 'none', cursor: 'pointer',
         display: 'flex', alignItems: 'center', gap: 14, padding: '18px 0', textAlign: 'left',
@@ -207,6 +207,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
   const { t } = useT();
   const [days, setDays] = useState([]);
   const [loadingDays, setLoadingDays] = useState(true);
+  const [itineraryOpen, setItineraryOpen] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
 
   useEffect(() => {
@@ -512,12 +513,79 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Itinerary */}
           <section className="exp-section" style={{ marginBottom: 56 }}>
-            <SectionTitle>{t('exp_roteiro_titulo')}</SectionTitle>
+            <div
+              onClick={() => dayGroups.length > 0 && setItineraryOpen(o => !o)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 20,
+                cursor: dayGroups.length > 0 ? 'pointer' : 'default',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 4, height: 28, borderRadius: 99, background: '#9bc8a9', flexShrink: 0 }} />
+                <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', color: T.text, margin: 0, letterSpacing: '0.02em', lineHeight: 1.05 }}>
+                  {t('exp_roteiro_titulo')}
+                </h2>
+              </div>
+              {dayGroups.length > 0 && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.accent }}>
+                  {itineraryOpen ? 'Recolher' : 'Ver roteiro'}
+                  {itineraryOpen ? <ChevronUp size={16} color={T.accent} /> : <ChevronDown size={16} color={T.accent} />}
+                </span>
+              )}
+            </div>
             <div className="exp-itinerary-card" style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, padding: '0 28px', boxShadow: T.shadow }}>
               {loadingDays ? (
                 <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMuted, padding: '24px 0' }}>{t('exp_roteiro_carregando')}</p>
               ) : dayGroups.length > 0 ? (
-                dayGroups.map((g, i) => <DayItem key={g.key} g={g} defaultOpen={i === 0} />)
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setItineraryOpen(o => !o)}
+                    style={{
+                      width: '100%',
+                      background: 'none',
+                      border: 'none',
+                      borderBottom: itineraryOpen ? `1px solid ${T.border}` : 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 14,
+                      padding: '18px 0',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <div style={{
+                      minWidth: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      flexShrink: 0,
+                      background: 'rgba(155,200,169,0.14)',
+                      border: '1.5px solid rgba(155,200,169,0.38)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Calendar size={18} color={T.accent} strokeWidth={1.8} />
+                    </div>
+                    <span className="exp-day-title-wrap" style={{ flex: 1, fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text }}>
+                      <span>{itineraryOpen ? 'Ocultar programação dia a dia' : 'Ver programação dia a dia'}</span>
+                      <span className="exp-day-subtitle" style={{ fontWeight: 400, color: T.textMuted, marginLeft: 10, fontSize: 13 }}>
+                        {`${dayGroups.filter(g => g.number >= 1).length || dayGroups.length} dias de roteiro`}
+                      </span>
+                    </span>
+                    {itineraryOpen ? (
+                      <ChevronUp size={18} color={T.accent} style={{ flexShrink: 0 }} />
+                    ) : (
+                      <ChevronDown size={18} color={T.accent} style={{ flexShrink: 0 }} />
+                    )}
+                  </button>
+                  {itineraryOpen && dayGroups.map((g, i) => (
+                    <DayItem key={g.key} g={g} defaultOpen={false} isLast={i === dayGroups.length - 1} />
+                  ))}
+                </>
               ) : (
                 <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMuted, padding: '24px 0' }}>
                   {t('exp_roteiro_vazio')}
