@@ -43,17 +43,65 @@ function LeadForm({ expedition }) {
     setStatus('loading');
     try {
       trackFormConversion(form);
-      const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL || '';
+      const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL || 'https://hook.us1.make.com/bwezo8pj1qnflg4eb1bkr7q1xnazp8lo';
       if (webhookUrl) {
         const analyticsCtx = getAnalyticsContext();
+        const mondayFormName = expedition.monday_name || expedition.name;
+        const cleanName = form.firstName.trim();
+        const cleanEmail = form.email.trim();
+        const cleanPhone = form.phone.trim();
+        const cleanInsta = form.instagram.trim().replace(/^@/, '');
+        const utmSource = analyticsCtx.utm_source || '';
+        const utmMedium = analyticsCtx.utm_medium || '';
+        const utmCampaign = analyticsCtx.utm_campaign || '';
+        const utmContent = analyticsCtx.utm_content || '';
+        const utmTerm = analyticsCtx.utm_term || '';
+
+        const mkField = (id, type, title, val, req = '0') => ({
+          id,
+          type,
+          title,
+          value: String(val ?? ''),
+          required: req,
+          raw_value: String(val ?? ''),
+        });
+
         await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            // Formato nativo esperado pelo gatilho elementor:WatchForms do cenário 2184187 no Make
+            form: {
+              id: expedition.slug || 'jt_site',
+              name: mondayFormName,
+            },
+            fields: {
+              nome: mkField('nome', 'text', 'Nome', cleanName, '1'),
+              email: mkField('email', 'email', 'E-mail', cleanEmail, '1'),
+              telefone: mkField('telefone', 'tel', 'Celular', cleanPhone, '1'),
+              instagram: mkField('instagram', 'text', 'Instagram', cleanInsta, '1'),
+              utm_source: mkField('utm_source', 'hidden', 'utm_source', utmSource, '0'),
+              utm_medium: mkField('utm_medium', 'hidden', 'utm_medium', utmMedium, '0'),
+              utm_campaign: mkField('utm_campaign', 'hidden', 'utm_campaign', utmCampaign, '0'),
+              utm_content: mkField('utm_content', 'hidden', 'utm_content', utmContent, '0'),
+              utm_term: mkField('utm_term', 'hidden', 'utm_term', utmTerm, '0'),
+            },
+            fieldsParsed: {
+              Nome: cleanName,
+              'E-mail': cleanEmail,
+              Celular: cleanPhone,
+              Instagram: cleanInsta,
+              utm_source: utmSource,
+              utm_medium: utmMedium,
+              utm_campaign: utmCampaign,
+              utm_content: utmContent,
+              utm_term: utmTerm,
+            },
+            // Campos extras de comportamento da sessão
             ...form,
-            fullName: form.firstName.trim(),
+            fullName: cleanName,
             expedition: expedition.name,
-            expeditionMondayName: expedition.monday_name || expedition.name,
+            expeditionMondayName: mondayFormName,
             expeditionSlug: expedition.slug,
             ...analyticsCtx,
           }),
