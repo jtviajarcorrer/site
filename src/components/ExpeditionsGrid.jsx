@@ -161,7 +161,14 @@ function ExpeditionCard({ exp, navigate, isMobile = false }) {
                         <div style={label}>
                           {inst ? (inst.entry ? `Entrada ${brl(inst.entry)} +` : 'Em até') : t('card_a_vista')}
                         </div>
-                        <div style={big}>{inst ? `${inst.max}x ${brl(inst.value)}` : brl(cash)}</div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                          {inst && (
+                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 12, fontWeight: 400, color: 'rgba(155,200,169,0.65)' }}>
+                              {inst.max}x
+                            </span>
+                          )}
+                          <span style={big}>{inst ? brl(inst.value) : brl(cash)}</span>
+                        </div>
                         {inst && cash && (
                           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 10.5 : 11, color: 'rgba(241,245,249,0.5)', marginTop: 3 }}>
                             {t('card_ou_a_vista', { valor: brl(cash) })}

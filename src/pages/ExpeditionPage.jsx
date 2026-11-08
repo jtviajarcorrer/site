@@ -346,7 +346,12 @@ export default function ExpeditionPage({ expedition, navigate }) {
           id: 'preco',
           Icon: BrlIcon,
           label: installments.entry ? `Entrada ${brl(installments.entry)} +` : 'Parcelamento',
-          value: `${installments.max}x ${brl(installments.value)}`,
+          value: (
+            <>
+              <span style={{ fontWeight: 400, color: T.textMuted, fontSize: 13, marginRight: 5 }}>{installments.max}x</span>
+              {brl(installments.value)}
+            </>
+          ),
         }
       : { id: 'preco', Icon: BrlIcon, label: t('exp_info_a_vista'), value: cashPrice ? brl(cashPrice) : t('preco_sob_consulta') },
     { id: 'vagas', Icon: Users, label: t('exp_info_vagas'), value: exp.spots_left != null ? (exp.spots_left <= 6 ? t('exp_info_ultimas_vagas', { vagas: exp.spots_left }) : t('exp_info_vagas_valor', { vagas: exp.spots_left })) : '—' },
@@ -703,8 +708,13 @@ export default function ExpeditionPage({ expedition, navigate }) {
                     <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.textMid, lineHeight: 1.5 }}>
                       {installments.entry ? `Entrada de ${brl(installments.entry)} +` : 'Parcelamento em até'}
                     </div>
-                    <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 44, fontWeight: 900, color: '#004140', lineHeight: 1.05, letterSpacing: '-0.01em' }}>
-                      {installments.max}x {brl(installments.value)}
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 400, color: T.textMuted }}>
+                        {installments.max}x
+                      </span>
+                      <span style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 44, fontWeight: 900, color: '#004140', lineHeight: 1.05, letterSpacing: '-0.01em' }}>
+                        {brl(installments.value)}
+                      </span>
                     </div>
                   </>
                 )}
@@ -747,8 +757,15 @@ export default function ExpeditionPage({ expedition, navigate }) {
                 ? (installments.entry ? `Entrada ${brl(installments.entry)} +` : 'Em até')
                 : t('exp_info_a_vista')}
             </div>
-            <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, color: T.accent, lineHeight: 1 }}>
-              {installments ? `${installments.max}x ${brl(installments.value)}` : (cashPrice ? brl(cashPrice) : t('preco_sob_consulta'))}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, lineHeight: 1 }}>
+              {installments && (
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 400, color: T.textMuted }}>
+                  {installments.max}x
+                </span>
+              )}
+              <span style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, color: T.accent }}>
+                {installments ? brl(installments.value) : (cashPrice ? brl(cashPrice) : t('preco_sob_consulta'))}
+              </span>
             </div>
           </div>
           <button
