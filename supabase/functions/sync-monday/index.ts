@@ -291,9 +291,10 @@ async function syncDays(sb: Any, expeditionId: string, startDate: string, summar
 // (o site usa o texto padrão embutido). Chaves removidas do quadro saem da tabela.
 const BOARD_TEXTOS = 18434998880;
 const TEXTO_COL = 'long_text_mm81kyv2';
+const TEXTO_IMG_COL = 'file_mm8xw9y9';
 
 async function syncSiteTexts(sb: Any): Promise<Any> {
-  const fields = `id name column_values(ids: ["${TEXTO_COL}"]) { id text }`;
+  const fields = `id name column_values(ids: ["${TEXTO_COL}","${TEXTO_IMG_COL}"]) { id text value }`;
   const items: Any[] = [];
   const first = await monday(`query { boards(ids: [${BOARD_TEXTOS}]) { items_page(limit: 500) { cursor items { ${fields} } } } }`);
   let page = first.boards[0].items_page;
@@ -311,8 +312,21 @@ async function syncSiteTexts(sb: Any): Promise<Any> {
   const now = new Date().toISOString();
   for (const it of items) {
     const key = String(it.name ?? '').trim();
-    const value = String(it.column_values?.[0]?.text ?? '').replace(/\r\n/g, '\n').trim();
-    if (!/^[a-z0-9_]+$/.test(key) || !value) continue; // só chaves válidas e com texto
+    if (!/^[a-z0-9_]+$/.test(key)) continue;
+    const textCol = it.column_values?.find((c: Any) => c.id === TEXTO_COL);
+    const imgCol = it.column_values?.find((c: Any) => c.id === TEXTO_IMG_COL);
+    let value = String(textCol?.text ?? '').replace(/\r\n/g, '\n').trim();
+    const files: Any[] = parseJson(imgCol?.value)?.files ?? [];
+    const assetId = files.find((f: Any) => f?.assetId)?.assetId;
+    if (assetId) {
+      try {
+        const mirrored = await mirrorAsset(sb, String(assetId), 'site');
+        if (mirrored) value = mirrored;
+      } catch {
+        // se falhar download do arquivo, mantém o valor textual
+      }
+    }
+    if (!value) continue; // só chaves válidas e com texto/imagem
     rows.push({ key, value, updated_at: now });
   }
 
