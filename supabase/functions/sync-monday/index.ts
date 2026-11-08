@@ -353,8 +353,26 @@ const BOARD_TEXTOS = 18434998880;
 const TEXTO_COL = 'long_text_mm81kyv2';
 const TEXTO_IMG_COL = 'file_mm8xw9y9';
 
+async function uploadFileToMondayColumn(itemId: string, columnId: string, fileUrl: string, fileName: string): Promise<string | null> {
+  const token = Deno.env.get('MONDAY_API_TOKEN');
+  if (!token) return null;
+  const imgResp = await fetch(fileUrl);
+  if (!imgResp.ok) return null;
+  const blob = await imgResp.blob();
+  const form = new FormData();
+  form.append('query', `mutation ($file: File!) { add_file_to_column (item_id: ${Number(itemId)}, column_id: "${columnId}", file: $file) { id } }`);
+  form.append('variables[file]', new File([blob], fileName, { type: blob.type || 'image/jpeg' }));
+  const res = await fetch('https://api.monday.com/v2/file', {
+    method: 'POST',
+    headers: { Authorization: token, 'API-Version': '2024-10' },
+    body: form,
+  });
+  const json = await res.json();
+  return json?.data?.add_file_to_column?.id ? String(json.data.add_file_to_column.id) : null;
+}
+
 async function syncSiteTexts(sb: Any): Promise<Any> {
-  const fields = `id name column_values(ids: ["${TEXTO_COL}","${TEXTO_IMG_COL}"]) { id text value }`;
+  const fields = `id name column_values(ids: ["${TEXTO_COL}","${TEXTO_IMG_COL}"]) { id text value ... on FileValue { files { ... on FileAssetValue { asset_id } } } }`;
   const items: Any[] = [];
   const first = await monday(`query { boards(ids: [${BOARD_TEXTOS}]) { items_page(limit: 500) { cursor items { ${fields} } } } }`);
   let page = first.boards[0].items_page;
@@ -376,8 +394,35 @@ async function syncSiteTexts(sb: Any): Promise<Any> {
     const textCol = it.column_values?.find((c: Any) => c.id === TEXTO_COL);
     const imgCol = it.column_values?.find((c: Any) => c.id === TEXTO_IMG_COL);
     let value = String(textCol?.text ?? '').replace(/\r\n/g, '\n').trim();
-    const files: Any[] = parseJson(imgCol?.value)?.files ?? [];
-    const assetId = files.find((f: Any) => f?.assetId)?.assetId;
+    const gqlFiles: Any[] = imgCol?.files ?? [];
+    const jsonFiles: Any[] = parseJson(imgCol?.value)?.files ?? [];
+    const fileList = gqlFiles.length ? gqlFiles : jsonFiles;
+    const lastFile = fileList.length ? fileList[fileList.length - 1] : null;
+    let assetId = lastFile?.asset_id ?? lastFile?.assetId;
+
+    // Se for o item de foto da seção "Perfil dos viajantes" (para_quem_foto) e ainda não houver arquivo na coluna Imagem,
+    // anexa automaticamente a foto hero.jpg na coluna Imagem do Monday e limpa a coluna Texto.
+    if (!assetId && key === 'para_quem_foto') {
+      try {
+        assetId = await uploadFileToMondayColumn(String(it.id), TEXTO_IMG_COL, 'https://jtviajarcorrer.pages.dev/hero.jpg', 'hero.jpg');
+        if (assetId) {
+          await monday(
+            `mutation ($boardId: ID!, $itemId: ID!, $vals: JSON!) { change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $vals) { id } }`,
+            {
+              boardId: String(BOARD_TEXTOS),
+              itemId: String(it.id),
+              vals: JSON.stringify({
+                [TEXTO_COL]: { text: '' },
+                text_mm81cm9z: 'Home - Perfil dos Viajantes - Foto abaixo do texto (anexada na coluna Imagem)',
+              }),
+            },
+          );
+        }
+      } catch {
+        // ignora erro de seed inicial
+      }
+    }
+
     if (assetId) {
       try {
         const mirrored = await mirrorAsset(sb, String(assetId), 'site');
