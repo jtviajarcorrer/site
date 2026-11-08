@@ -376,7 +376,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
       </div>
 
       {/* ── Main content ── */}
-      <div className="exp-main-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 32px 100px', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 48, alignItems: 'start' }}>
+      <div className="exp-main-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 32px 40px', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 48, alignItems: 'start' }}>
 
         {/* ── LEFT ── */}
         <div style={{ minWidth: 0 }}>
@@ -615,7 +615,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
         {/* ── RIGHT: sticky sidebar ── */}
         <div id="reservar" className="exp-sidebar" style={{ position: 'sticky', top: 88, scrollMarginTop: 84 }}>
           {/* price card */}
-          <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: '28px 24px', boxShadow: T.shadowLg, marginBottom: 16 }}>
+          <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: '28px 24px', boxShadow: T.shadowLg }}>
             {(installments || cashPrice) && (
               <div style={{ marginBottom: 20, textAlign: 'center' }}>
                 {installments && (
@@ -654,20 +654,6 @@ export default function ExpeditionPage({ expedition, navigate }) {
               </p>
               <LeadForm expedition={exp} />
             </div>
-          </div>
-
-          {/* trust signals */}
-          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[
-              { Icon: Shield, k: 'confianca_1' },
-              { Icon: Star,   k: 'confianca_2' },
-              { Icon: Zap,    k: 'confianca_3' },
-            ].map(({ Icon, k }) => (
-              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Icon size={14} color='#9bc8a9' />
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: T.textMid }}>{t(k)}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -717,8 +703,8 @@ export default function ExpeditionPage({ expedition, navigate }) {
         @media (max-width: 900px) {
           .exp-main-grid {
             grid-template-columns: 1fr !important;
-            gap: 36px !important;
-            padding: 36px 20px 64px !important;
+            gap: 32px !important;
+            padding: 36px 20px 16px !important;
           }
           .exp-sidebar {
             position: static !important;
