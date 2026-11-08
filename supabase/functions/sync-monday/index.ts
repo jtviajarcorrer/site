@@ -528,6 +528,7 @@ Deno.serve(async (req: Request) => {
         const row: Record<string, any> = {
           slug,
           name,
+          monday_name: it.name,
           status: cron.to < hoje ? 'Encerrada' : (vagasTotais === 0 ? 'Esgotado' : 'Vagas Abertas'),
           start_date: cron.from,
           end_date: cron.to,

@@ -217,10 +217,10 @@ export default function ExpeditionPage({ expedition, navigate }) {
       pagePath: `/${expedition.slug}`,
       pageType: 'expedition',
       expeditionSlug: expedition.slug,
-      expeditionName: expedition.name,
+      expeditionName: expedition.monday_name || expedition.name,
     });
     return cleanup;
-  }, [expedition.slug, expedition.name]);
+  }, [expedition.slug, expedition.monday_name, expedition.name]);
 
   useEffect(() => {
     const el = document.getElementById('reservar');

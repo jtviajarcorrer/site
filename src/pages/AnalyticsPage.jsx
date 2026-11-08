@@ -113,18 +113,23 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
     try { sessionStorage.removeItem(PWD_STORAGE_KEY); } catch {}
   };
 
-  const expeditionOptions = useMemo(() => {
+  const expeditionNameBySlug = useMemo(() => {
     const map = new Map();
-    for (const e of expeditions) {
-      if (e?.slug) map.set(e.slug, e.name || e.slug);
+    const sorted = [...expeditions].sort((a, b) => String(a.start_date || '').localeCompare(String(b.start_date || '')));
+    for (const e of sorted) {
+      if (e?.slug) map.set(e.slug, e.monday_name || e.name || e.slug);
     }
     for (const s of sessions) {
       if (s.expedition_slug && !map.has(s.expedition_slug)) {
         map.set(s.expedition_slug, s.expedition_name || s.expedition_slug);
       }
     }
-    return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
+    return map;
   }, [expeditions, sessions]);
+
+  const expeditionOptions = useMemo(() => {
+    return Array.from(expeditionNameBySlug.entries()).map(([slug, name]) => ({ slug, name }));
+  }, [expeditionNameBySlug]);
 
   const filtered = useMemo(() => {
     return sessions.filter((s) => {
@@ -226,7 +231,7 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
       if (!groups.has(slug)) {
         groups.set(slug, {
           slug,
-          name: s.expedition_name || slug,
+          name: expeditionNameBySlug.get(slug) || s.expedition_name || slug,
           total: 0,
           durationSum: 0,
           sawForm: 0,
@@ -256,7 +261,7 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
       }
     }
     return Array.from(groups.values()).sort((a, b) => b.total - a.total);
-  }, [sessions]);
+  }, [sessions, expeditionNameBySlug]);
 
   const cardStyle = {
     background: 'rgba(13, 25, 38, 0.85)',
@@ -370,14 +375,14 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
                 onChange={(e) => setPageFilter(e.target.value)}
                 style={{ background: 'transparent', border: 'none', color: '#f1f5f9', fontSize: 13, fontWeight: 600, outline: 'none', cursor: 'pointer' }}
               >
-                <option value="all_expeditions" style={{ background: '#0b1926' }}>Todas as Landing Pages (Expedições)</option>
+                <option value="all_expeditions" style={{ background: '#0b1926' }}>Todos os Roteiros (Landing Pages)</option>
                 {expeditionOptions.map((e) => (
                   <option key={e.slug} value={e.slug} style={{ background: '#0b1926' }}>
-                    Expedição: {e.name}
+                    {e.name}
                   </option>
                 ))}
                 <option value="home" style={{ background: '#0b1926' }}>Home Principal (/)</option>
-                <option value="all" style={{ background: '#0b1926' }}>Todo o Site (Home + Expedições)</option>
+                <option value="all" style={{ background: '#0b1926' }}>Todo o Site (Home + Roteiros)</option>
               </select>
             </div>
 
@@ -718,7 +723,7 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
                           {formatDateTime(s.created_at)}
                         </td>
                         <td style={{ padding: '10px 8px', fontWeight: 600, color: '#f1f5f9' }}>
-                          {s.expedition_name || (s.page_type === 'home' ? 'Home (/)' : s.page_path)}
+                          {expeditionNameBySlug.get(s.expedition_slug) || s.expedition_name || (s.page_type === 'home' ? 'Home (/)' : s.page_path)}
                         </td>
                         <td style={{ padding: '10px 8px', color: 'rgba(241,245,249,0.65)' }}>
                           {s.utm_source || s.referrer || 'Direto'} · {s.device_type}
