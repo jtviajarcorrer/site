@@ -1,7 +1,26 @@
+import { useEffect } from 'react';
 import { Calendar, ArrowRight, Compass, ShieldCheck } from 'lucide-react';
 import { useT } from '../content/SiteTexts.jsx';
 import { imgUrl } from '../utils/img.js';
 import { brl, getInstallments, getCashPrice } from '../utils/pricing.js';
+import { startPageAnalytics } from '../utils/analytics.js';
+
+function ensureBioUtmInUrl() {
+  try {
+    const sp = new URLSearchParams(window.location.search);
+    if (!sp.get('utm_source')) {
+      sp.set('utm_source', 'Instagram');
+      sp.set('utm_medium', 'Organic');
+      sp.set('utm_campaign', 'Insta Bio');
+      sp.set('utm_content', 'Instagram_Bio');
+      sp.set('utm_term', 'Instagram_Bio');
+      const nextUrl = `${window.location.pathname}?${sp.toString()}${window.location.hash || ''}`;
+      window.history.replaceState({}, '', nextUrl);
+    }
+  } catch {
+    // ignore
+  }
+}
 
 const GOLD_TEXT = {
   background: 'linear-gradient(135deg,#dab83f,#e8ca6a)',
@@ -145,12 +164,13 @@ function ExpeditionBubbleLink({ exp, navigate }) {
 
   const handleClick = (e) => {
     e.preventDefault();
+    ensureBioUtmInUrl();
     navigate(`/${exp.slug}`);
   };
 
   return (
     <a
-      href={`/${exp.slug}`}
+      href={`/${exp.slug}?utm_source=Instagram&utm_medium=Organic&utm_campaign=Insta+Bio&utm_content=Instagram_Bio&utm_term=Instagram_Bio`}
       onClick={handleClick}
       className="jt-exp-bubble-row"
       style={{
@@ -357,6 +377,12 @@ function ExpeditionBubbleLink({ exp, navigate }) {
 export default function LinksPage({ expeditions = [], loading = false, navigate }) {
   const { t, rich } = useT();
 
+  useEffect(() => {
+    ensureBioUtmInUrl();
+    const cleanup = startPageAnalytics({ pagePath: '/links', pageType: 'links' });
+    return cleanup;
+  }, []);
+
   // Apenas expedições futuras/atuais com Destaque no Site, ordenadas por data
   const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
   const endOf = (e) => e.end_date || e.start_date || '';
@@ -366,6 +392,7 @@ export default function LinksPage({ expeditions = [], loading = false, navigate 
 
   const goHome = (e) => {
     e.preventDefault();
+    ensureBioUtmInUrl();
     navigate('/');
   };
 

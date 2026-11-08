@@ -85,7 +85,26 @@ function parseAndPersistAttribution() {
     }
 
     const saved = sessionStorage.getItem(ATTRIBUTION_STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.utm_source) return parsed;
+    }
+
+    // Se a pessoa entrou pela página de Link da Bio (/links, /bio, /linktree) sem UTM explícita na URL,
+    // atribui automaticamente os rótulos oficiais do quadro de Funil do Monday para Instagram Bio.
+    const cleanSlug = (window.location.pathname || '').replace(/^\/+|\/+$/g, '').toLowerCase();
+    if (cleanSlug === 'links' || cleanSlug === 'bio' || cleanSlug === 'linktree') {
+      const bioAttr = {
+        utm_source: 'Instagram',
+        utm_medium: 'Organic',
+        utm_campaign: 'Insta Bio',
+        utm_content: 'Instagram_Bio',
+        utm_term: 'Instagram_Bio',
+        ad_click_id: null,
+      };
+      sessionStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(bioAttr));
+      return bioAttr;
+    }
   } catch {
     // ignore
   }
