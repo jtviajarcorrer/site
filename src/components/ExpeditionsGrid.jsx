@@ -19,13 +19,11 @@ function ExpeditionCard({ exp, navigate, isMobile = false }) {
   };
 
   const cardWidth = isMobile
-    ? (expanded ? 'min(256px, calc(100vw - 48px))' : 172)
+    ? (expanded ? 'min(268px, calc(100vw - 48px))' : 172)
     : (expanded ? 'min(340px, calc(100vw - 48px))' : 268);
-  const cardHeight = isMobile
-    ? (expanded ? 390 : 192)
-    : (expanded ? 530 : 270);
+  const cardMinHeight = isMobile ? 192 : 270;
   const imgHeight = isMobile
-    ? (expanded ? 120 : 96)
+    ? (expanded ? 120 : 92)
     : (expanded ? 200 : 150);
 
   return (
@@ -39,7 +37,8 @@ function ExpeditionCard({ exp, navigate, isMobile = false }) {
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         display: 'flex', flexDirection: 'column',
         width: cardWidth,
-        height: cardHeight,
+        minHeight: cardMinHeight,
+        height: 'auto',
         ...(isPast ? { filter: 'grayscale(1)', opacity: 0.4, userSelect: 'none' } : {}),
       }}
       onMouseEnter={isPast ? undefined : e => {
@@ -145,17 +144,17 @@ function ExpeditionCard({ exp, navigate, isMobile = false }) {
         }}>
           {expanded && (
             <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between' }}>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: 'rgba(241,245,249,0.48)', lineHeight: 1.6, margin: '8px 0 20px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 12.5 : 13, color: 'rgba(241,245,249,0.55)', lineHeight: 1.55, margin: isMobile ? '6px 0 14px' : '8px 0 20px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {exp.description}
               </p>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(155,200,169,0.1)', paddingTop: 16, marginTop: 'auto' }}>
-                <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderTop: '1px solid rgba(155,200,169,0.1)', paddingTop: isMobile ? 12 : 16, marginTop: 'auto' }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   {(() => {
                     const inst = getInstallments(exp);
                     const cash = getCashPrice(exp);
-                    const label = { fontFamily: "'Inter', sans-serif", fontSize: 11, color: 'rgba(155,200,169,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' };
-                    const big = { fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 26, fontWeight: 900, background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 };
+                    const label = { fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 10 : 11, color: 'rgba(155,200,169,0.55)', textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1.3 };
+                    const big = { fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: isMobile ? 24 : 26, fontWeight: 900, background: 'linear-gradient(135deg,#dab83f,#e8ca6a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.05 };
                     if (!inst && !cash) return <div style={big}>{t('card_sob_consulta')}</div>;
                     return (
                       <>
@@ -164,7 +163,7 @@ function ExpeditionCard({ exp, navigate, isMobile = false }) {
                         </div>
                         <div style={big}>{inst ? brl(inst.value) : brl(cash)}</div>
                         {inst && cash && (
-                          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: 'rgba(241,245,249,0.5)', marginTop: 4 }}>
+                          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 10.5 : 11, color: 'rgba(241,245,249,0.5)', marginTop: 3 }}>
                             {t('card_ou_a_vista', { valor: brl(cash) })}
                           </div>
                         )}
@@ -174,9 +173,9 @@ function ExpeditionCard({ exp, navigate, isMobile = false }) {
                 </div>
                 <button
                   onClick={handleNavigate}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,65,64,0.3)', border: '1px solid rgba(155,200,169,0.2)', borderRadius: 99, padding: '8px 16px', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s, border-color 0.2s' }}
+                  style={{ flexShrink: 0, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,65,64,0.35)', border: '1px solid rgba(155,200,169,0.28)', borderRadius: 99, padding: isMobile ? '8px 14px' : '8px 16px', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s, border-color 0.2s' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(218,184,63,0.15)'; e.currentTarget.style.borderColor = 'rgba(218,184,63,0.4)'; e.currentTarget.style.color = '#dab83f'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,65,64,0.3)'; e.currentTarget.style.borderColor = 'rgba(155,200,169,0.2)'; e.currentTarget.style.color = '#9bc8a9'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,65,64,0.35)'; e.currentTarget.style.borderColor = 'rgba(155,200,169,0.28)'; e.currentTarget.style.color = '#9bc8a9'; }}
                 >
                   {t('card_ver')} <ArrowRight size={14} />
                 </button>
