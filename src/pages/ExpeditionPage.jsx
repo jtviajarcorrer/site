@@ -345,10 +345,8 @@ export default function ExpeditionPage({ expedition, navigate }) {
       ? {
           id: 'preco',
           Icon: BrlIcon,
-          label: installments.entry ? 'Parcelamento' : t('exp_info_parcelas', { parcelas: installments.max }),
-          value: installments.entry
-            ? `Entrada ${brl(installments.entry)} + ${installments.max}x de ${brl(installments.value)}`
-            : brl(installments.value),
+          label: installments.entry ? `Entrada ${brl(installments.entry)} +` : 'Parcelamento',
+          value: `${installments.max}x ${brl(installments.value)}`,
         }
       : { id: 'preco', Icon: BrlIcon, label: t('exp_info_a_vista'), value: cashPrice ? brl(cashPrice) : t('preco_sob_consulta') },
     { id: 'vagas', Icon: Users, label: t('exp_info_vagas'), value: exp.spots_left != null ? (exp.spots_left <= 6 ? t('exp_info_ultimas_vagas', { vagas: exp.spots_left }) : t('exp_info_vagas_valor', { vagas: exp.spots_left })) : '—' },
@@ -703,10 +701,10 @@ export default function ExpeditionPage({ expedition, navigate }) {
                 {installments && (
                   <>
                     <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: T.textMid, lineHeight: 1.5 }}>
-                      {installments.entry ? t('preco_entrada_parcelas', { entrada: brl(installments.entry), parcelas: installments.max }) : t('preco_so_parcelas', { parcelas: installments.max })}
+                      {installments.entry ? `Entrada de ${brl(installments.entry)} +` : 'Parcelamento em até'}
                     </div>
                     <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 44, fontWeight: 900, color: '#004140', lineHeight: 1.05, letterSpacing: '-0.01em' }}>
-                      {brl(installments.value)}
+                      {installments.max}x {brl(installments.value)}
                     </div>
                   </>
                 )}
@@ -746,11 +744,11 @@ export default function ExpeditionPage({ expedition, navigate }) {
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               {installments
-                ? (installments.entry ? t('card_entrada_parcelas', { entrada: brl(installments.entry), parcelas: installments.max }) : t('exp_info_parcelas', { parcelas: installments.max }))
+                ? (installments.entry ? `Entrada ${brl(installments.entry)} +` : 'Em até')
                 : t('exp_info_a_vista')}
             </div>
             <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, color: T.accent, lineHeight: 1 }}>
-              {installments ? brl(installments.value) : (cashPrice ? brl(cashPrice) : t('preco_sob_consulta'))}
+              {installments ? `${installments.max}x ${brl(installments.value)}` : (cashPrice ? brl(cashPrice) : t('preco_sob_consulta'))}
             </div>
           </div>
           <button
