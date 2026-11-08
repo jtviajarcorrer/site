@@ -138,6 +138,7 @@ export default function Stats({ expeditions = [] }) {
   return (
     <section
       ref={sectionRef}
+      data-analytics-section="comunidade"
       className="stats-section"
       style={{
         position: 'relative',

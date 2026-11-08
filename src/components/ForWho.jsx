@@ -8,6 +8,7 @@ export default function ForWho() {
   return (
     <section
       id="para-quem"
+      data-analytics-section="para_quem"
       style={{
         padding: '48px 24px 72px',
         maxWidth: 1100,

@@ -511,7 +511,7 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
   const timelineRows = buildTimelineRows(upcoming, isMobile);
 
   return (
-    <section id="expedicoes" style={{ padding: isMobile ? '40px 20px' : '64px 24px', maxWidth: 1200, margin: '0 auto' }}>
+    <section id="expedicoes" data-analytics-section="expedicoes" style={{ padding: isMobile ? '40px 20px' : '64px 24px', maxWidth: 1200, margin: '0 auto' }}>
       <div className="reveal expedition-header" style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: isMobile ? 20 : 32 }}>
         <div>
 

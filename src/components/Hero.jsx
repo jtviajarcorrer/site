@@ -23,7 +23,7 @@ export default function Hero({ navigate }) {
   };
 
   return (
-    <section className="hero-section" style={{ position: 'relative', height: '82vh', minHeight: 480, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+    <section data-analytics-section="hero" className="hero-section" style={{ position: 'relative', height: '82vh', minHeight: 480, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
 
       {/* BG */}
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>

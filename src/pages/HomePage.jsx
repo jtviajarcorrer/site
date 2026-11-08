@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Navbar from '../components/Navbar.jsx';
 import Hero from '../components/Hero.jsx';
 import ForWho from '../components/ForWho.jsx';
@@ -6,9 +7,16 @@ import Stats from '../components/Stats.jsx';
 import Footer from '../components/Footer.jsx';
 import VideoCarousel from '../components/VideoCarousel.jsx';
 import { useT } from '../content/SiteTexts.jsx';
+import { startPageAnalytics } from '../utils/analytics.js';
 
 export default function HomePage({ expeditions, loading, navigate }) {
   const { t, rich } = useT();
+
+  useEffect(() => {
+    const cleanup = startPageAnalytics({ pagePath: '/', pageType: 'home' });
+    return cleanup;
+  }, []);
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--jt-bg)' }}>
       <Navbar navigate={navigate} />
@@ -17,7 +25,7 @@ export default function HomePage({ expeditions, loading, navigate }) {
       <ExpeditionsGrid expeditions={expeditions} loading={loading} navigate={navigate} />
 
       {/* Sobre a JT */}
-      <section id="sobre" className="home-sobre-section" style={{ padding: '64px 24px 36px' }}>
+      <section id="sobre" data-analytics-section="sobre" className="home-sobre-section" style={{ padding: '64px 24px 36px' }}>
         <div className="home-sobre-grid" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 60, alignItems: 'flex-start' }}>
           <div className="reveal">
 

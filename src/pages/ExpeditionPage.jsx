@@ -10,6 +10,7 @@ import { supabase } from '../supabaseClient.js';
 import { brl, getInstallments, getCashPrice } from '../utils/pricing.js';
 import { useT } from '../content/SiteTexts.jsx';
 import { imgUrl } from '../utils/img.js';
+import { startPageAnalytics, trackFormStart, trackFormConversion, trackAnalyticsEvent } from '../utils/analytics.js';
 
 /* ─── Design tokens — JT light theme ─── */
 const T = {
@@ -41,6 +42,7 @@ function LeadForm({ expedition }) {
     e.preventDefault();
     setStatus('loading');
     try {
+      trackFormConversion(form);
       const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL || '';
       if (webhookUrl) {
         await fetch(webhookUrl, {
@@ -88,25 +90,25 @@ function LeadForm({ expedition }) {
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <input required type="text" style={inputStyle} placeholder={t('form_nome')} value={form.firstName}
-        onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
-        onFocus={e => { e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+        onChange={e => { trackFormStart(); setForm(f => ({ ...f, firstName: e.target.value })); }}
+        onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
         onBlur={e => { e.target.style.borderColor = 'rgba(155,200,169,0.35)'; e.target.style.background = 'rgba(155,200,169,0.13)'; }}
       />
       <input required type="email" style={inputStyle} placeholder={t('form_email')} value={form.email}
-        onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-        onFocus={e => { e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+        onChange={e => { trackFormStart(); setForm(f => ({ ...f, email: e.target.value })); }}
+        onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
         onBlur={e => { e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
       />
       <input required type="tel" style={inputStyle} placeholder={t('form_whatsapp')} value={form.phone}
-        onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-        onFocus={e => { e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+        onChange={e => { trackFormStart(); setForm(f => ({ ...f, phone: e.target.value })); }}
+        onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
         onBlur={e => { e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
       />
       <div style={{ position: 'relative' }}>
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMuted, pointerEvents: 'none' }}>@</span>
         <input required type="text" style={{ ...inputStyle, paddingLeft: 28 }} placeholder={t('form_instagram')} value={form.instagram}
-          onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))}
-          onFocus={e => { e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+          onChange={e => { trackFormStart(); setForm(f => ({ ...f, instagram: e.target.value })); }}
+          onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
           onBlur={e => { e.target.style.borderColor = 'rgba(155,200,169,0.35)'; e.target.style.background = 'rgba(155,200,169,0.13)'; }}
         />
       </div>
@@ -211,6 +213,16 @@ export default function ExpeditionPage({ expedition, navigate }) {
   const [formVisible, setFormVisible] = useState(false);
 
   useEffect(() => {
+    const cleanup = startPageAnalytics({
+      pagePath: `/${expedition.slug}`,
+      pageType: 'expedition',
+      expeditionSlug: expedition.slug,
+      expeditionName: expedition.name,
+    });
+    return cleanup;
+  }, [expedition.slug, expedition.name]);
+
+  useEffect(() => {
     const el = document.getElementById('reservar');
     if (!el) return;
     const obs = new IntersectionObserver(
@@ -287,6 +299,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
   ];
 
   const scrollToForm = () => {
+    trackAnalyticsEvent('clicked_mobile_cta', true);
     document.getElementById('reservar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -295,7 +308,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
       <Navbar navigate={navigate} logoAlwaysVisible />
 
       {/* ── Hero (mesmo estilo da home: foto desfocada + grade + degradês) ── */}
-      <div className="exp-hero" style={{ position: 'relative', height: '60vh', minHeight: 440, overflow: 'hidden', background: '#060e18' }}>
+      <div data-analytics-section="hero" className="exp-hero" style={{ position: 'relative', height: '60vh', minHeight: 440, overflow: 'hidden', background: '#060e18' }}>
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
           <img src={imgUrl(exp.cover_image, 1600)} alt="" aria-hidden="true" fetchpriority="high" className="kenburns" style={{
             width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%',
@@ -344,7 +357,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
       </div>
 
       {/* ── Highlight bar ── */}
-      <div style={{ background: '#fff', borderBottom: `1px solid ${T.border}`, boxShadow: '0 2px 12px rgba(0,65,64,0.07)' }}>
+      <div data-analytics-section="destaques" style={{ background: '#fff', borderBottom: `1px solid ${T.border}`, boxShadow: '0 2px 12px rgba(0,65,64,0.07)' }}>
         <div className="exp-highlights-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px', display: 'flex', flexWrap: 'wrap' }}>
           {highlights.map(({ id, Icon, label, value }, i) => (
             <div key={id} className="exp-highlight-item" style={{
@@ -382,7 +395,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
         <div style={{ minWidth: 0 }}>
 
           {/* About */}
-          <section className="exp-section" style={{ marginBottom: 56 }}>
+          <section data-analytics-section="sobre" className="exp-section" style={{ marginBottom: 56 }}>
             <SectionTitle>{t('exp_sobre_titulo')}</SectionTitle>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: T.textMid, lineHeight: 1.85, margin: 0, whiteSpace: 'pre-wrap' }}>
               {exp.description}
@@ -390,7 +403,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
           </section>
 
           {/* Perfil do grupo (texto fixo) */}
-          <section className="exp-section" style={{ marginBottom: 56 }}>
+          <section data-analytics-section="perfil" className="exp-section" style={{ marginBottom: 56 }}>
             <SectionTitle>{t('exp_perfil_titulo')}</SectionTitle>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: T.textMid, lineHeight: 1.85, margin: 0, whiteSpace: 'pre-wrap' }}>
               {t('exp_perfil_texto')}
@@ -399,7 +412,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Includes / Not Includes */}
           {(exp.included || exp.not_included) && (
-            <section className="exp-section" style={{ marginBottom: 56 }}>
+            <section data-analytics-section="incluso" className="exp-section" style={{ marginBottom: 56 }}>
               <SectionTitle>{t('exp_incluso_titulo')}</SectionTitle>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20 }}>
                 {exp.included && (
@@ -436,7 +449,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Hospedagem */}
           {Array.isArray(exp.stays) && exp.stays.length > 0 && (
-            <section className="exp-section" style={{ marginBottom: 56 }}>
+            <section data-analytics-section="hospedagem" className="exp-section" style={{ marginBottom: 56 }}>
               <SectionTitle>{t('exp_hospedagem_titulo')}</SectionTitle>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
@@ -456,7 +469,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Prova de Corrida */}
           {Array.isArray(exp.races) && exp.races.length > 0 && (
-            <section className="exp-section" style={{ marginBottom: 56 }}>
+            <section data-analytics-section="prova" className="exp-section" style={{ marginBottom: 56 }}>
               <SectionTitle>{t('exp_prova_titulo')}</SectionTitle>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -481,6 +494,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
                           href={r.website}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => trackAnalyticsEvent('clicked_race_link', true)}
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -512,9 +526,16 @@ export default function ExpeditionPage({ expedition, navigate }) {
           )}
 
           {/* Itinerary */}
-          <section className="exp-section" style={{ marginBottom: 56 }}>
+          <section data-analytics-section="roteiro" className="exp-section" style={{ marginBottom: 56 }}>
             <div
-              onClick={() => dayGroups.length > 0 && setItineraryOpen(o => !o)}
+              onClick={() => {
+                if (dayGroups.length > 0) {
+                  setItineraryOpen(o => {
+                    if (!o) trackAnalyticsEvent('opened_itinerary', true);
+                    return !o;
+                  });
+                }
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -543,7 +564,12 @@ export default function ExpeditionPage({ expedition, navigate }) {
                 <>
                   <button
                     type="button"
-                    onClick={() => setItineraryOpen(o => !o)}
+                    onClick={() => {
+                      setItineraryOpen(o => {
+                        if (!o) trackAnalyticsEvent('opened_itinerary', true);
+                        return !o;
+                      });
+                    }}
                     style={{
                       width: '100%',
                       background: 'none',
@@ -596,7 +622,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
 
           {/* Gallery */}
           {exp.gallery_images && exp.gallery_images.length > 0 && (
-            <section className="exp-section">
+            <section data-analytics-section="galeria" className="exp-section">
               <SectionTitle>{t('exp_destino_titulo')}</SectionTitle>
               <div className="exp-gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                 {exp.gallery_images.map((img, i) => (
@@ -613,7 +639,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
         </div>
 
         {/* ── RIGHT: sticky sidebar ── */}
-        <div id="reservar" className="exp-sidebar" style={{ position: 'sticky', top: 88, scrollMarginTop: 84 }}>
+        <div id="reservar" data-analytics-section="formulario" className="exp-sidebar" style={{ position: 'sticky', top: 88, scrollMarginTop: 84 }}>
           {/* price card */}
           <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: '28px 24px', boxShadow: T.shadowLg }}>
             {(installments || cashPrice) && (

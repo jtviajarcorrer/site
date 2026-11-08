@@ -14,7 +14,7 @@ export default function Footer({ navigate }) {
   );
 
   return (
-    <footer id="contato" style={{ borderTop: '1px solid rgba(155,200,169,0.08)', padding: '24px 24px 32px' }}>
+    <footer id="contato" data-analytics-section="contato" style={{ borderTop: '1px solid rgba(155,200,169,0.08)', padding: '24px 24px 32px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
         {/* Final CTA */}

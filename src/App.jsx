@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient.js';
 import HomePage from './pages/HomePage.jsx';
 import ExpeditionPage from './pages/ExpeditionPage.jsx';
 import LinksPage from './pages/LinksPage.jsx';
+import AnalyticsPage from './pages/AnalyticsPage.jsx';
 
 // Rola até a seção (#id). Tenta por ~3s porque a página de destino pode demorar a montar.
 function scrollToHash(hash, tries = 0) {
@@ -46,6 +47,10 @@ export default function App() {
 
   if (slug === 'links' || slug === 'bio' || slug === 'linktree') {
     return <LinksPage expeditions={expeditions} loading={loading} navigate={navigate} />;
+  }
+
+  if (slug === 'analytics' || slug === 'gestao' || slug === 'metricas') {
+    return <AnalyticsPage expeditions={expeditions} navigate={navigate} />;
   }
 
   const expedition = slug ? expeditions.find(e => e.slug === slug) : null;
