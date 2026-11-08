@@ -2,7 +2,6 @@ import Navbar from '../components/Navbar.jsx';
 import Hero from '../components/Hero.jsx';
 import ForWho from '../components/ForWho.jsx';
 import ExpeditionsGrid from '../components/ExpeditionsGrid.jsx';
-import HowItWorks from '../components/HowItWorks.jsx';
 import Stats from '../components/Stats.jsx';
 import Footer from '../components/Footer.jsx';
 import VideoCarousel from '../components/VideoCarousel.jsx';
@@ -15,7 +14,6 @@ export default function HomePage({ expeditions, loading, navigate }) {
       <Navbar navigate={navigate} />
       <Hero navigate={navigate} />
       <ForWho />
-      <HowItWorks />
       <ExpeditionsGrid expeditions={expeditions} loading={loading} navigate={navigate} />
 
       {/* Sobre a JT */}

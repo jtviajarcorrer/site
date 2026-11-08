@@ -446,17 +446,9 @@ export default function VideoCarousel() {
 
           {/* Traveler Info */}
           <div className="video-info-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', flex: '1 1 240px', paddingTop: 38 }}>
-            <div>
-              <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 32, fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.02em', lineHeight: 1 }}>
-                {activeVideo.name}
-              </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: 'rgba(155,200,169,0.8)', fontWeight: 600, marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {activeVideo.location}
-              </div>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: 'rgba(241,245,249,0.8)', fontStyle: 'italic', lineHeight: 1.6, margin: '12px 0 0' }}>
-                {activeVideo.quote}
-              </p>
-            </div>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: 'rgba(241,245,249,0.8)', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+              {activeVideo.quote}
+            </p>
           </div>
         </div>
       </div>

@@ -410,20 +410,20 @@ function TimelineRow({ row, navigate, isMobile = false }) {
             aria-label="Rolar para a esquerda"
             style={{
               pointerEvents: 'auto',
-              border: 'none',
+              border: '2px solid #f3dc7a',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: isMobile ? 34 : 44,
-              height: isMobile ? 34 : 44,
+              width: isMobile ? 36 : 44,
+              height: isMobile ? 36 : 44,
               borderRadius: '50%',
-              background: 'rgba(218,184,63,0.12)',
-              color: '#dab83f',
-              backdropFilter: 'blur(4px)',
+              background: '#dab83f',
+              color: '#06111a',
+              boxShadow: '0 4px 16px rgba(218,184,63,0.55)',
             }}
           >
-            <ArrowLeft size={isMobile ? 16 : 20} />
+            <ArrowLeft size={isMobile ? 18 : 20} strokeWidth={2.5} />
           </button>
         </div>
       )}
@@ -451,20 +451,20 @@ function TimelineRow({ row, navigate, isMobile = false }) {
             aria-label="Rolar para a direita"
             style={{
               pointerEvents: 'auto',
-              border: 'none',
+              border: '2px solid #f3dc7a',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: isMobile ? 34 : 44,
-              height: isMobile ? 34 : 44,
+              width: isMobile ? 36 : 44,
+              height: isMobile ? 36 : 44,
               borderRadius: '50%',
-              background: 'rgba(218,184,63,0.12)',
-              color: '#dab83f',
-              backdropFilter: 'blur(4px)',
+              background: '#dab83f',
+              color: '#06111a',
+              boxShadow: '0 4px 16px rgba(218,184,63,0.55)',
             }}
           >
-            <ArrowRight size={isMobile ? 16 : 20} />
+            <ArrowRight size={isMobile ? 18 : 20} strokeWidth={2.5} />
           </button>
         </div>
       )}
@@ -563,9 +563,9 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
         
         /* Pulse Animation for Right Arrow */
         @keyframes pulseRight {
-          0% { transform: translateX(0); opacity: 0.4; }
-          50% { transform: translateX(6px); opacity: 1; }
-          100% { transform: translateX(0); opacity: 0.4; }
+          0% { transform: translateX(0); opacity: 0.9; }
+          50% { transform: translateX(5px); opacity: 1; }
+          100% { transform: translateX(0); opacity: 0.9; }
         }
         .pulse-arrow {
           animation: pulseRight 2s infinite ease-in-out;
@@ -573,9 +573,9 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
 
         /* Pulse Animation for Left Arrow */
         @keyframes pulseLeft {
-          0% { transform: translateX(0); opacity: 0.4; }
-          50% { transform: translateX(-6px); opacity: 1; }
-          100% { transform: translateX(0); opacity: 0.4; }
+          0% { transform: translateX(0); opacity: 0.9; }
+          50% { transform: translateX(-5px); opacity: 1; }
+          100% { transform: translateX(0); opacity: 0.9; }
         }
         .pulse-arrow-left {
           animation: pulseLeft 2s infinite ease-in-out;

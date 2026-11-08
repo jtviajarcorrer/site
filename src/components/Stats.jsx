@@ -232,7 +232,7 @@ export default function Stats({ expeditions = [] }) {
               style={{
                 transitionDelay: `${i * 100}ms`,
                 textAlign: 'center',
-                padding: '40px 24px 36px',
+                padding: '32px 24px',
                 background:
                   'linear-gradient(165deg, rgba(10, 26, 38, 0.68) 0%, rgba(6, 17, 26, 0.52) 100%)',
                 backdropFilter: 'blur(14px)',
@@ -257,43 +257,6 @@ export default function Stats({ expeditions = [] }) {
                   '0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06)';
               }}
             >
-              {/* Halo luminoso sutil atrás do ícone */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: -20,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 140,
-                  height: 140,
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(218,184,63,0.12) 0%, transparent 70%)',
-                  pointerEvents: 'none',
-                }}
-              />
-
-              {/* Medalhão do ícone */}
-              <div
-                className="stats-icon-box"
-                style={{
-                  width: 60,
-                  height: 60,
-                  margin: '0 auto 18px',
-                  borderRadius: 18,
-                  background:
-                    'linear-gradient(135deg, rgba(218,184,63,0.14) 0%, rgba(0,65,64,0.28) 100%)',
-                  border: '1px solid rgba(218,184,63,0.32)',
-                  boxShadow:
-                    '0 8px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                }}
-              >
-                <StatIcon index={i} />
-              </div>
-
               <div
                 className="stats-number"
                 style={{
@@ -342,18 +305,8 @@ export default function Stats({ expeditions = [] }) {
             gap: 12px !important;
           }
           .stats-card {
-            padding: 20px 12px 18px !important;
+            padding: 18px 12px !important;
             border-radius: 16px !important;
-          }
-          .stats-icon-box {
-            width: 44px !important;
-            height: 44px !important;
-            border-radius: 12px !important;
-            margin-bottom: 10px !important;
-          }
-          .stats-icon-box svg {
-            width: 22px !important;
-            height: 22px !important;
           }
           .stats-number {
             font-size: clamp(32px, 8.5vw, 42px) !important;

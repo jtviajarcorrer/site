@@ -13,7 +13,6 @@ const InstagramIcon = () => (
 const NAV_LINKS = [
   { key: 'menu_quem_somos',    href: '#sobre' },
   { key: 'menu_expedicoes',    href: '#expedicoes' },
-  { key: 'menu_como_funciona', href: '#como-funciona' },
   { key: 'menu_contato',       href: '#contato' },
 ];
 

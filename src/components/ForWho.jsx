@@ -9,12 +9,12 @@ export default function ForWho() {
     <section
       id="para-quem"
       style={{
-        padding: '96px 24px 80px',
+        padding: '48px 24px 72px',
         maxWidth: 1100,
         margin: '0 auto',
       }}
     >
-      <div className="reveal" style={{ maxWidth: 780 }}>
+      <div style={{ maxWidth: 780 }}>
         <h2 className="section-title" style={{ marginBottom: 24 }}>
           {rich('para_quem_titulo', ['#dab83f', '#9bc8a9'])}
         </h2>
@@ -98,7 +98,7 @@ export default function ForWho() {
       <style>{`
         @media (max-width: 768px) {
           #para-quem {
-            padding: 56px 20px 48px !important;
+            padding: 24px 20px 44px !important;
           }
           .for-who-photo-wrap {
             aspect-ratio: 4 / 3 !important;

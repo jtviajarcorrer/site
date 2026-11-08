@@ -23,7 +23,7 @@ export default function Hero({ navigate }) {
   };
 
   return (
-    <section className="hero-section" style={{ position: 'relative', height: '100vh', minHeight: 600, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+    <section className="hero-section" style={{ position: 'relative', height: '82vh', minHeight: 480, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
 
       {/* BG */}
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
@@ -141,23 +141,29 @@ export default function Hero({ navigate }) {
           50%       { transform: translateY(5px); opacity: 1; }
         }
         @media (max-width: 768px) {
+          .hero-section {
+            height: 72svh !important;
+            min-height: 400px !important;
+          }
           .hero-section > .hero-content {
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
-            padding: 0 24px 56px !important;
-            gap: 28px !important;
+            padding: 36px 24px 36px !important;
+            gap: 20px !important;
           }
           .hero-logo-container img {
-            width: 112px !important;
+            width: 104px !important;
           }
           .hero-text-container {
             align-items: center !important;
+            gap: 18px !important;
           }
           .hero-main-text {
             text-align: center !important;
           }
           .scroll-indicator {
+            bottom: 14px !important;
             right: 50% !important;
             transform: translateX(50%) !important;
           }
