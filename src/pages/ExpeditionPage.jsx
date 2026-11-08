@@ -10,7 +10,7 @@ import { supabase } from '../supabaseClient.js';
 import { brl, getInstallments, getCashPrice } from '../utils/pricing.js';
 import { useT } from '../content/SiteTexts.jsx';
 import { imgUrl } from '../utils/img.js';
-import { startPageAnalytics, trackFormStart, trackFormConversion, trackAnalyticsEvent } from '../utils/analytics.js';
+import { startPageAnalytics, trackFormStart, trackFormConversion, trackAnalyticsEvent, getAnalyticsContext } from '../utils/analytics.js';
 
 /* ─── Design tokens — JT light theme ─── */
 const T = {
@@ -45,10 +45,18 @@ function LeadForm({ expedition }) {
       trackFormConversion(form);
       const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL || '';
       if (webhookUrl) {
+        const analyticsCtx = getAnalyticsContext();
         await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...form, fullName: form.firstName.trim(), expedition: expedition.name, expeditionSlug: expedition.slug }),
+          body: JSON.stringify({
+            ...form,
+            fullName: form.firstName.trim(),
+            expedition: expedition.name,
+            expeditionMondayName: expedition.monday_name || expedition.name,
+            expeditionSlug: expedition.slug,
+            ...analyticsCtx,
+          }),
         });
       }
       await new Promise(r => setTimeout(r, 800));
@@ -90,26 +98,26 @@ function LeadForm({ expedition }) {
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <input required type="text" style={inputStyle} placeholder={t('form_nome')} value={form.firstName}
-        onChange={e => { trackFormStart(); setForm(f => ({ ...f, firstName: e.target.value })); }}
-        onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
-        onBlur={e => { e.target.style.borderColor = 'rgba(155,200,169,0.35)'; e.target.style.background = 'rgba(155,200,169,0.13)'; }}
+        onChange={e => { const next = { ...form, firstName: e.target.value }; setForm(next); trackFormStart(next); }}
+        onFocus={e => { trackFormStart(form); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+        onBlur={e => { trackFormStart(form); e.target.style.borderColor = 'rgba(155,200,169,0.35)'; e.target.style.background = 'rgba(155,200,169,0.13)'; }}
       />
       <input required type="email" style={inputStyle} placeholder={t('form_email')} value={form.email}
-        onChange={e => { trackFormStart(); setForm(f => ({ ...f, email: e.target.value })); }}
-        onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
-        onBlur={e => { e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
+        onChange={e => { const next = { ...form, email: e.target.value }; setForm(next); trackFormStart(next); }}
+        onFocus={e => { trackFormStart(form); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+        onBlur={e => { trackFormStart(form); e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
       />
       <input required type="tel" style={inputStyle} placeholder={t('form_whatsapp')} value={form.phone}
-        onChange={e => { trackFormStart(); setForm(f => ({ ...f, phone: e.target.value })); }}
-        onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
-        onBlur={e => { e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
+        onChange={e => { const next = { ...form, phone: e.target.value }; setForm(next); trackFormStart(next); }}
+        onFocus={e => { trackFormStart(form); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+        onBlur={e => { trackFormStart(form); e.target.style.borderColor = T.border; e.target.style.background = T.bgMuted; }}
       />
       <div style={{ position: 'relative' }}>
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontFamily: "'Inter', sans-serif", fontSize: 14, color: T.textMuted, pointerEvents: 'none' }}>@</span>
         <input required type="text" style={{ ...inputStyle, paddingLeft: 28 }} placeholder={t('form_instagram')} value={form.instagram}
-          onChange={e => { trackFormStart(); setForm(f => ({ ...f, instagram: e.target.value })); }}
-          onFocus={e => { trackFormStart(); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
-          onBlur={e => { e.target.style.borderColor = 'rgba(155,200,169,0.35)'; e.target.style.background = 'rgba(155,200,169,0.13)'; }}
+          onChange={e => { const next = { ...form, instagram: e.target.value }; setForm(next); trackFormStart(next); }}
+          onFocus={e => { trackFormStart(form); e.target.style.borderColor = T.accent; e.target.style.background = '#fff'; }}
+          onBlur={e => { trackFormStart(form); e.target.style.borderColor = 'rgba(155,200,169,0.35)'; e.target.style.background = 'rgba(155,200,169,0.13)'; }}
         />
       </div>
       {status === 'error' && (

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Users, Clock, CheckCircle2, XCircle, AlertTriangle, RefreshCw,
-  Smartphone, Monitor, TrendingUp, MousePointerClick, ArrowLeft, Filter, Eye, Lock, LogOut
+  Smartphone, Monitor, TrendingUp, MousePointerClick, ArrowLeft, Filter, Eye, Lock, LogOut,
+  Link2, Copy, Check, UserCheck
 } from 'lucide-react';
 import { supabase } from '../supabaseClient.js';
 
@@ -67,6 +68,15 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
   const [loading, setLoading] = useState(false);
   const [daysFilter, setDaysFilter] = useState('7'); // '1' | '7' | '30' | 'all'
   const [pageFilter, setPageFilter] = useState('all_expeditions'); // 'all_expeditions' | 'home' | 'all' | slug
+  const [visitorFilter, setVisitorFilter] = useState(''); // filter table by specific visitor_id
+
+  // UTM Link Builder state
+  const [utmTargetSlug, setUtmTargetSlug] = useState('tailandia-2026');
+  const [utmSource, setUtmSource] = useState('instagram');
+  const [utmMedium, setUtmMedium] = useState('paid_social');
+  const [utmCampaign, setUtmCampaign] = useState('tailandia26');
+  const [utmContent, setUtmContent] = useState('reels_01');
+  const [copiedUtm, setCopiedUtm] = useState(false);
 
   const fetchAnalytics = async (pwdToUse = savedPwd) => {
     if (!pwdToUse) return;
@@ -262,6 +272,94 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
     }
     return Array.from(groups.values()).sort((a, b) => b.total - a.total);
   }, [sessions, expeditionNameBySlug]);
+
+  // Agrupamento por Origem / Campanha (Instagram Ads / UTMs)
+  const perSourceCampaign = useMemo(() => {
+    const groups = new Map();
+    for (const s of filtered) {
+      const source = s.utm_source || (s.ad_click_id?.startsWith('fbclid:') ? 'instagram (fbclid)' : s.referrer || 'Acesso Direto');
+      const medium = s.utm_medium || (s.ad_click_id ? 'paid_social' : '—');
+      const campaign = s.utm_campaign || '—';
+      const content = s.utm_content || '—';
+      const key = `${source}||${medium}||${campaign}||${content}`;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          source,
+          medium,
+          campaign,
+          content,
+          total: 0,
+          visitors: new Set(),
+          durationSum: 0,
+          startedForm: 0,
+          converted: 0,
+          notConverted: 0,
+        });
+      }
+      const g = groups.get(key);
+      g.total += 1;
+      if (s.visitor_id) g.visitors.add(s.visitor_id);
+      g.durationSum += s.duration_ms || 0;
+      if (s.started_form || s.converted) g.startedForm += 1;
+      if (s.converted) g.converted += 1;
+      else g.notConverted += 1;
+    }
+    return Array.from(groups.values()).sort((a, b) => b.total - a.total);
+  }, [filtered]);
+
+  // Mapa de visitas e identidade por visitor_id (conecta todas as sessões da mesma pessoa)
+  const visitorSummaryMap = useMemo(() => {
+    const map = new Map();
+    for (const s of sessions) {
+      const vid = s.visitor_id;
+      if (!vid) continue;
+      if (!map.has(vid)) {
+        map.set(vid, {
+          count: 0,
+          lead_name: '',
+          lead_instagram: '',
+          lead_phone: '',
+          lead_email: '',
+          everConverted: false,
+        });
+      }
+      const v = map.get(vid);
+      v.count += 1;
+      if (s.lead_name && !v.lead_name) v.lead_name = s.lead_name;
+      if (s.lead_instagram && !v.lead_instagram) v.lead_instagram = s.lead_instagram;
+      if (s.lead_phone && !v.lead_phone) v.lead_phone = s.lead_phone;
+      if (s.lead_email && !v.lead_email) v.lead_email = s.lead_email;
+      if (s.converted) v.everConverted = true;
+    }
+    return map;
+  }, [sessions]);
+
+  const tableSessions = useMemo(() => {
+    if (!visitorFilter) return filtered;
+    return filtered.filter((s) => s.visitor_id === visitorFilter);
+  }, [filtered, visitorFilter]);
+
+  const generatedUtmUrl = useMemo(() => {
+    const origin = typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : 'https://jtviajarcorrer.pages.dev';
+    const path = utmTargetSlug === 'home' ? '/' : utmTargetSlug === 'links' ? '/links' : `/${utmTargetSlug}`;
+    const pairs = [];
+    if (utmSource.trim()) pairs.push(`utm_source=${encodeURIComponent(utmSource.trim()).replace(/%7B/g, '{').replace(/%7D/g, '}')}`);
+    if (utmMedium.trim()) pairs.push(`utm_medium=${encodeURIComponent(utmMedium.trim()).replace(/%7B/g, '{').replace(/%7D/g, '}')}`);
+    if (utmCampaign.trim()) pairs.push(`utm_campaign=${encodeURIComponent(utmCampaign.trim()).replace(/%7B/g, '{').replace(/%7D/g, '}')}`);
+    if (utmContent.trim()) pairs.push(`utm_content=${encodeURIComponent(utmContent.trim()).replace(/%7B/g, '{').replace(/%7D/g, '}')}`);
+    return pairs.length ? `${origin}${path}?${pairs.join('&')}` : `${origin}${path}`;
+  }, [utmTargetSlug, utmSource, utmMedium, utmCampaign, utmContent]);
+
+  const handleCopyUtm = () => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(generatedUtmUrl);
+      setCopiedUtm(true);
+      setTimeout(() => setCopiedUtm(false), 2200);
+    }
+  };
 
   const cardStyle = {
     background: 'rgba(13, 25, 38, 0.85)',
@@ -679,18 +777,284 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
           </div>
         )}
 
+        {/* Origem & Campanhas (Instagram Ads / UTMs) + Gerador de Links UTM */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 20, alignItems: 'start' }}>
+          {/* Tabela de Origem & Campanhas */}
+          <div style={cardStyle}>
+            <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 6px', letterSpacing: '0.02em' }}>
+              Origem & Campanhas (Instagram Ads / UTMs)
+            </h2>
+            <p style={{ fontSize: 13, color: 'rgba(241,245,249,0.55)', margin: '0 0 16px' }}>
+              Cruzamento de acessos, tempo médio e cadastros por campanha/anúncio
+            </p>
+            {perSourceCampaign.length === 0 ? (
+              <div style={{ padding: '20px 0', color: 'rgba(241,245,249,0.5)', fontSize: 13 }}>
+                Nenhum acesso registrado ainda neste filtro.
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(155,200,169,0.16)', textAlign: 'left', color: 'rgba(155,200,169,0.75)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <th style={{ padding: '8px 6px' }}>Origem / Mídia</th>
+                      <th style={{ padding: '8px 6px' }}>Campanha / Criativo</th>
+                      <th style={{ padding: '8px 6px' }}>Acessos</th>
+                      <th style={{ padding: '8px 6px' }}>Tempo</th>
+                      <th style={{ padding: '8px 6px' }}>Cadastros</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {perSourceCampaign.map((row) => (
+                      <tr key={row.key} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <td style={{ padding: '10px 6px', fontWeight: 700, color: '#f1f5f9' }}>
+                          <div>{row.source}</div>
+                          {row.medium !== '—' && (
+                            <div style={{ fontSize: 11, color: 'rgba(155,200,169,0.75)', fontWeight: 500 }}>{row.medium}</div>
+                          )}
+                        </td>
+                        <td style={{ padding: '10px 6px', color: 'rgba(241,245,249,0.8)' }}>
+                          <div style={{ fontWeight: 600, color: row.campaign !== '—' ? '#dab83f' : 'rgba(241,245,249,0.45)' }}>
+                            {row.campaign}
+                          </div>
+                          {row.content !== '—' && (
+                            <div style={{ fontSize: 11, color: 'rgba(241,245,249,0.55)' }}>Criativo: {row.content}</div>
+                          )}
+                        </td>
+                        <td style={{ padding: '10px 6px' }}>
+                          <strong>{row.total}</strong>{' '}
+                          <span style={{ fontSize: 11, color: 'rgba(241,245,249,0.5)' }}>({row.visitors.size} ún.)</span>
+                        </td>
+                        <td style={{ padding: '10px 6px', color: '#9bc8a9', fontWeight: 600 }}>
+                          {formatDuration(row.total ? row.durationSum / row.total : 0)}
+                        </td>
+                        <td style={{ padding: '10px 6px' }}>
+                          <span style={{ color: '#4ade80', fontWeight: 800 }}>{row.converted}</span>{' '}
+                          <span style={{ fontSize: 11, color: 'rgba(241,245,249,0.55)' }}>({pct(row.converted, row.total)})</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Gerador de Links com UTM para Instagram Ads / Bio */}
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
+              <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#dab83f', margin: 0, letterSpacing: '0.02em' }}>
+                Gerador de Links com UTM (Instagram Ads & Bio)
+              </h2>
+              <Link2 size={18} color="#dab83f" />
+            </div>
+            <p style={{ fontSize: 12.5, color: 'rgba(241,245,249,0.6)', margin: '0 0 14px', lineHeight: 1.45 }}>
+              Gere o endereço da Landing Page com UTMs para colar no Gerenciador de Anúncios da Meta, na Bio ou nos Stories. Mesmo se a pessoa entrar na Home e depois clicar no roteiro, as UTMs continuam salvas até o cadastro.
+            </p>
+
+            {/* Atalhos rápidos */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+              {[
+                {
+                  label: 'Meta Ads (Dinâmico)',
+                  apply: () => {
+                    setUtmSource('instagram');
+                    setUtmMedium('paid_social');
+                    setUtmCampaign('{{campaign.name}}');
+                    setUtmContent('{{ad.name}}');
+                  },
+                },
+                {
+                  label: 'Instagram Ads (Manual)',
+                  apply: () => {
+                    setUtmSource('instagram');
+                    setUtmMedium('paid_social');
+                    setUtmCampaign(utmTargetSlug.replace(/-/g, '_'));
+                    setUtmContent('reels_01');
+                  },
+                },
+                {
+                  label: 'Link da Bio',
+                  apply: () => {
+                    setUtmSource('instagram');
+                    setUtmMedium('bio');
+                    setUtmCampaign('perfil_jt');
+                    setUtmContent('link_bio');
+                  },
+                },
+                {
+                  label: 'Stories / Direct',
+                  apply: () => {
+                    setUtmSource('instagram');
+                    setUtmMedium('stories');
+                    setUtmCampaign(utmTargetSlug.replace(/-/g, '_'));
+                    setUtmContent('figurinha_link');
+                  },
+                },
+                {
+                  label: 'WhatsApp',
+                  apply: () => {
+                    setUtmSource('whatsapp');
+                    setUtmMedium('grupos');
+                    setUtmCampaign(utmTargetSlug.replace(/-/g, '_'));
+                    setUtmContent('disparo');
+                  },
+                },
+              ].map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={preset.apply}
+                  style={{
+                    background: 'rgba(218,184,63,0.12)',
+                    border: '1px solid rgba(218,184,63,0.3)',
+                    color: '#dab83f',
+                    borderRadius: 8,
+                    padding: '5px 10px',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(155,200,169,0.8)', marginBottom: 4, fontWeight: 700, textTransform: 'uppercase' }}>
+                  Página de Destino (Roteiro)
+                </label>
+                <select
+                  value={utmTargetSlug}
+                  onChange={(e) => setUtmTargetSlug(e.target.value)}
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(155,200,169,0.22)', borderRadius: 9, padding: '9px 12px', color: '#f1f5f9', fontSize: 13, fontWeight: 600, outline: 'none' }}
+                >
+                  {expeditionOptions.map((e) => (
+                    <option key={e.slug} value={e.slug} style={{ background: '#0b1926' }}>
+                      {e.name} (/{e.slug})
+                    </option>
+                  ))}
+                  <option value="home" style={{ background: '#0b1926' }}>Home Principal (/)</option>
+                  <option value="links" style={{ background: '#0b1926' }}>Página de Links da Bio (/links)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(155,200,169,0.8)', marginBottom: 4, fontWeight: 700 }}>
+                  utm_source (Origem)
+                </label>
+                <input
+                  type="text"
+                  value={utmSource}
+                  onChange={(e) => setUtmSource(e.target.value)}
+                  placeholder="instagram"
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(155,200,169,0.22)', borderRadius: 9, padding: '8px 10px', color: '#f1f5f9', fontSize: 12.5, outline: 'none' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(155,200,169,0.8)', marginBottom: 4, fontWeight: 700 }}>
+                  utm_medium (Mídia)
+                </label>
+                <input
+                  type="text"
+                  value={utmMedium}
+                  onChange={(e) => setUtmMedium(e.target.value)}
+                  placeholder="paid_social"
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(155,200,169,0.22)', borderRadius: 9, padding: '8px 10px', color: '#f1f5f9', fontSize: 12.5, outline: 'none' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(155,200,169,0.8)', marginBottom: 4, fontWeight: 700 }}>
+                  utm_campaign (Campanha)
+                </label>
+                <input
+                  type="text"
+                  value={utmCampaign}
+                  onChange={(e) => setUtmCampaign(e.target.value)}
+                  placeholder="tailandia26"
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(155,200,169,0.22)', borderRadius: 9, padding: '8px 10px', color: '#f1f5f9', fontSize: 12.5, outline: 'none' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(155,200,169,0.8)', marginBottom: 4, fontWeight: 700 }}>
+                  utm_content (Anúncio / Criativo)
+                </label>
+                <input
+                  type="text"
+                  value={utmContent}
+                  onChange={(e) => setUtmContent(e.target.value)}
+                  placeholder="reels_01"
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(155,200,169,0.22)', borderRadius: 9, padding: '8px 10px', color: '#f1f5f9', fontSize: 12.5, outline: 'none' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(218,184,63,0.28)', borderRadius: 10, padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <code style={{ fontSize: 11.5, color: '#9bc8a9', wordBreak: 'break-all', lineHeight: 1.4 }}>
+                {generatedUtmUrl}
+              </code>
+              <button
+                type="button"
+                onClick={handleCopyUtm}
+                style={{
+                  flexShrink: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: copiedUtm ? '#4ade80' : '#dab83f',
+                  color: '#06111a',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                {copiedUtm ? <><Check size={14} /> Copiado</> : <><Copy size={14} /> Copiar URL</>}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Últimas Sessões Individualizadas */}
         <div style={cardStyle}>
-          <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 6px', letterSpacing: '0.02em' }}>
-            Últimos Acessos e Jornada Individual ({filtered.length})
-          </h2>
-          <p style={{ fontSize: 13, color: 'rgba(241,245,249,0.55)', margin: '0 0 16px' }}>
-            Histórico detalhado de cada visita, tempo nas seções e status do formulário
-          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+            <div>
+              <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 26, fontWeight: 900, textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 4px', letterSpacing: '0.02em' }}>
+                Últimos Acessos e Jornada Individual ({tableSessions.length})
+              </h2>
+              <p style={{ fontSize: 13, color: 'rgba(241,245,249,0.55)', margin: 0 }}>
+                Cada pessoa recebe um ID único (<code style={{ color: '#dab83f' }}>#visitor_id</code>) salvo no navegador. Quando ela preenche o formulário, todas as visitas anteriores dela são conectadas automaticamente ao nome e @instagram.
+              </p>
+            </div>
+            {visitorFilter && (
+              <button
+                type="button"
+                onClick={() => setVisitorFilter('')}
+                style={{
+                  background: 'rgba(218,184,63,0.16)',
+                  border: '1px solid rgba(218,184,63,0.4)',
+                  color: '#dab83f',
+                  borderRadius: 9,
+                  padding: '7px 12px',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Filtrando Visitante #{visitorFilter.slice(-6)} · Limpar filtro ✕
+              </button>
+            )}
+          </div>
 
           {loading ? (
             <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(241,245,249,0.5)' }}>Carregando dados...</div>
-          ) : filtered.length === 0 ? (
+          ) : tableSessions.length === 0 ? (
             <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(241,245,249,0.5)' }}>
               Nenhum acesso registrado ainda para este filtro. Abra uma página de expedição para testar em tempo real!
             </div>
@@ -700,16 +1064,17 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(155,200,169,0.16)', textAlign: 'left', color: 'rgba(155,200,169,0.75)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                     <th style={{ padding: '10px 8px' }}>Data / Hora</th>
+                    <th style={{ padding: '10px 8px' }}>Visitante (ID)</th>
                     <th style={{ padding: '10px 8px' }}>Página</th>
-                    <th style={{ padding: '10px 8px' }}>Origem / Disp.</th>
+                    <th style={{ padding: '10px 8px' }}>Origem / Campanha UTM</th>
                     <th style={{ padding: '10px 8px' }}>Tempo Total</th>
                     <th style={{ padding: '10px 8px' }}>Scroll</th>
                     <th style={{ padding: '10px 8px' }}>Seções com mais tempo</th>
-                    <th style={{ padding: '10px 8px' }}>Status / Lead</th>
+                    <th style={{ padding: '10px 8px' }}>Status / Identificação da Pessoa</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.slice(0, 80).map((s) => {
+                  {tableSessions.slice(0, 80).map((s) => {
                     const topSecs = Object.entries(s.section_times || {})
                       .filter(([, ms]) => Number(ms) >= 1000)
                       .sort((a, b) => Number(b[1]) - Number(a[1]))
@@ -717,16 +1082,58 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
                       .map(([k, ms]) => `${k}: ${formatDuration(Number(ms))}`)
                       .join(' · ');
 
+                    const vInfo = visitorSummaryMap.get(s.visitor_id) || { count: 1 };
+                    const shortVid = s.visitor_id ? s.visitor_id.slice(-6) : '—';
+                    const personName = s.lead_name || vInfo.lead_name || '';
+                    const personInsta = s.lead_instagram || vInfo.lead_instagram || '';
+                    const personPhone = s.lead_phone || vInfo.lead_phone || '';
+                    const hasIdentity = Boolean(personName || personInsta || personPhone);
+
                     return (
                       <tr key={s.session_id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                         <td style={{ padding: '10px 8px', whiteSpace: 'nowrap', color: 'rgba(241,245,249,0.7)' }}>
                           {formatDateTime(s.created_at)}
                         </td>
+                        <td style={{ padding: '10px 8px', whiteSpace: 'nowrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => setVisitorFilter(visitorFilter === s.visitor_id ? '' : s.visitor_id)}
+                            title="Clique para ver todas as visitas desta mesma pessoa"
+                            style={{
+                              background: hasIdentity ? 'rgba(74,222,128,0.12)' : 'rgba(255,255,255,0.06)',
+                              border: `1px solid ${hasIdentity ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.12)'}`,
+                              color: hasIdentity ? '#4ade80' : '#9bc8a9',
+                              borderRadius: 6,
+                              padding: '3px 7px',
+                              fontSize: 11,
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              fontFamily: 'monospace',
+                            }}
+                          >
+                            #{shortVid}
+                          </button>
+                          {vInfo.count > 1 && (
+                            <span style={{ marginLeft: 6, fontSize: 10.5, color: '#dab83f', fontWeight: 700 }}>
+                              {vInfo.count} visitas
+                            </span>
+                          )}
+                        </td>
                         <td style={{ padding: '10px 8px', fontWeight: 600, color: '#f1f5f9' }}>
                           {expeditionNameBySlug.get(s.expedition_slug) || s.expedition_name || (s.page_type === 'home' ? 'Home (/)' : s.page_path)}
                         </td>
-                        <td style={{ padding: '10px 8px', color: 'rgba(241,245,249,0.65)' }}>
-                          {s.utm_source || s.referrer || 'Direto'} · {s.device_type}
+                        <td style={{ padding: '10px 8px', color: 'rgba(241,245,249,0.75)' }}>
+                          <div>
+                            <strong>{s.utm_source || (s.ad_click_id?.startsWith('fbclid:') ? 'instagram (ads)' : s.referrer || 'Direto')}</strong>
+                            {s.utm_medium ? ` / ${s.utm_medium}` : ''} · {s.device_type}
+                          </div>
+                          {(s.utm_campaign || s.utm_content || s.ad_click_id) && (
+                            <div style={{ fontSize: 11, color: '#dab83f', marginTop: 2 }}>
+                              {s.utm_campaign ? `Camp: ${s.utm_campaign}` : ''}
+                              {s.utm_content ? ` · Criativo: ${s.utm_content}` : ''}
+                              {!s.utm_campaign && s.ad_click_id ? ` · ${s.ad_click_id.slice(0, 18)}…` : ''}
+                            </div>
+                          )}
                         </td>
                         <td style={{ padding: '10px 8px', fontWeight: 700, color: '#dab83f' }}>
                           {formatDuration(s.duration_ms)}
@@ -743,24 +1150,32 @@ export default function AnalyticsPage({ expeditions = [], navigate }) {
                               <span style={{ display: 'inline-block', background: 'rgba(74,222,128,0.16)', color: '#4ade80', border: '1px solid rgba(74,222,128,0.35)', borderRadius: 99, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
                                 Cadastrou em {formatDuration(s.time_to_convert_ms || s.duration_ms)}
                               </span>
-                              {(s.lead_name || s.lead_instagram) && (
-                                <div style={{ fontSize: 11, color: 'rgba(241,245,249,0.75)', marginTop: 3 }}>
-                                  {s.lead_name} {s.lead_instagram ? `(@${s.lead_instagram})` : ''} {s.lead_phone ? `· ${s.lead_phone}` : ''}
-                                </div>
-                              )}
                             </div>
                           ) : s.started_form ? (
                             <span style={{ display: 'inline-block', background: 'rgba(251,191,36,0.15)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.35)', borderRadius: 99, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
                               Iniciou form e abandonou
                             </span>
                           ) : s.saw_form ? (
-                            <span style={{ display: 'inline-block', background: 'rgba(248,113,113,0.12)', color: '#f87171', borderRadius: '1px solid rgba(248,113,113,0.25)', borderRadius: 99, padding: '2px 8px', fontSize: 11, fontWeight: 600 }}>
+                            <span style={{ display: 'inline-block', background: 'rgba(248,113,113,0.12)', color: '#f87171', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 99, padding: '2px 8px', fontSize: 11, fontWeight: 600 }}>
                               Viu form e não preencheu
                             </span>
                           ) : (
                             <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.06)', color: 'rgba(241,245,249,0.6)', borderRadius: 99, padding: '2px 8px', fontSize: 11 }}>
                               Saiu sem preencher
                             </span>
+                          )}
+                          {hasIdentity && (
+                            <div style={{ fontSize: 11.5, color: '#f1f5f9', marginTop: 4, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                              <UserCheck size={12} color="#4ade80" />
+                              <span>{personName || 'Visitante identificado'}</span>
+                              {personInsta && <span style={{ color: '#dab83f' }}>@{personInsta}</span>}
+                              {personPhone && <span style={{ color: 'rgba(155,200,169,0.85)' }}>· {personPhone}</span>}
+                              {!s.converted && vInfo.everConverted && (
+                                <span style={{ fontSize: 10, color: '#4ade80', background: 'rgba(74,222,128,0.1)', padding: '1px 5px', borderRadius: 4 }}>
+                                  converteu em outra visita
+                                </span>
+                              )}
+                            </div>
                           )}
                         </td>
                       </tr>

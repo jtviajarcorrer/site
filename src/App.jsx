@@ -36,8 +36,12 @@ export default function App() {
 
   const navigate = (path) => {
     const [pathname, hash] = path.split('#');
-    window.history.pushState({}, '', path);
-    setCurrentPath(pathname || '/');
+    const cleanTarget = pathname || '/';
+    // Preserva UTMs / fbclid na URL ao navegar internamente entre a Home e uma Landing Page
+    const currentSearch = window.location.search || '';
+    const finalUrl = `${cleanTarget}${currentSearch}${hash ? '#' + hash : ''}`;
+    window.history.pushState({}, '', finalUrl);
+    setCurrentPath(cleanTarget);
     if (hash) scrollToHash('#' + hash);
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
