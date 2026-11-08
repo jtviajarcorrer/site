@@ -6,7 +6,7 @@ import { imgUrl } from '../utils/img.js';
 
 const MAX_CARDS_PER_ROW = 4;
 
-function ExpeditionCard({ exp, navigate }) {
+function ExpeditionCard({ exp, navigate, isMobile = false }) {
   const { t } = useT();
   const isPast = !!exp._past;
   const [expanded, setExpanded] = useState(false);
@@ -18,18 +18,28 @@ function ExpeditionCard({ exp, navigate }) {
     navigate(`/${exp.slug}`);
   };
 
+  const cardWidth = isMobile
+    ? (expanded ? 'min(256px, calc(100vw - 48px))' : 172)
+    : (expanded ? 'min(340px, calc(100vw - 48px))' : 268);
+  const cardHeight = isMobile
+    ? (expanded ? 390 : 192)
+    : (expanded ? 530 : 270);
+  const imgHeight = isMobile
+    ? (expanded ? 120 : 96)
+    : (expanded ? 200 : 150);
+
   return (
     <div
       onClick={handleCardClick}
       aria-disabled={isPast || undefined}
       style={{
-        position: 'relative', borderRadius: 20, overflow: 'hidden', cursor: isPast ? 'default' : 'pointer',
+        position: 'relative', borderRadius: isMobile ? 14 : 20, overflow: 'hidden', cursor: isPast ? 'default' : 'pointer',
         background: isPast ? 'rgba(255,255,255,0.03)' : 'rgba(18,65,92,0.12)',
         border: isPast ? '1px dashed rgba(241,245,249,0.14)' : '1px solid rgba(155,200,169,0.1)',
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         display: 'flex', flexDirection: 'column',
-        width: expanded ? 'min(340px, calc(100vw - 48px))' : 268,
-        height: expanded ? 530 : 270,
+        width: cardWidth,
+        height: cardHeight,
         ...(isPast ? { filter: 'grayscale(1)', opacity: 0.4, userSelect: 'none' } : {}),
       }}
       onMouseEnter={isPast ? undefined : e => {
@@ -44,7 +54,7 @@ function ExpeditionCard({ exp, navigate }) {
       }}
     >
       {/* Cover image */}
-      <div style={{ position: 'relative', height: expanded ? 200 : 150, overflow: 'hidden', flexShrink: 0, transition: 'height 0.4s ease' }}>
+      <div style={{ position: 'relative', height: imgHeight, overflow: 'hidden', flexShrink: 0, transition: 'height 0.4s ease' }}>
         {exp.cover_image ? (
           <img
             src={imgUrl(exp.cover_image, 640)}
@@ -77,24 +87,24 @@ function ExpeditionCard({ exp, navigate }) {
       </div>
 
       {/* Content */}
-      <div style={{ padding: expanded ? '20px 22px 30px' : '16px', display: 'flex', flexDirection: 'column', flexGrow: 1, transition: 'padding 0.4s ease' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: expanded ? 28 : 24, fontWeight: 900, letterSpacing: '0.02em', textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 8px', lineHeight: 1, transition: 'font-size 0.4s ease' }}>
+      <div style={{ padding: isMobile ? (expanded ? '12px 14px 16px' : '10px 12px 12px') : (expanded ? '20px 22px 30px' : '16px'), display: 'flex', flexDirection: 'column', flexGrow: 1, transition: 'padding 0.4s ease' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
+          <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: isMobile ? (expanded ? 22 : 18) : (expanded ? 28 : 24), fontWeight: 900, letterSpacing: '0.02em', textTransform: 'uppercase', color: '#f1f5f9', margin: isMobile ? '0 0 4px' : '0 0 8px', lineHeight: 1, transition: 'font-size 0.4s ease' }}>
             {exp.name}
           </h3>
           {!isPast && (
-            <div style={{ color: 'rgba(155,200,169,0.5)', marginTop: 4 }}>
-              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            <div style={{ color: 'rgba(155,200,169,0.5)', marginTop: isMobile ? 2 : 4, flexShrink: 0 }}>
+              {expanded ? <ChevronUp size={isMobile ? 14 : 16} /> : <ChevronDown size={isMobile ? 14 : 16} />}
             </div>
           )}
         </div>
 
         {/* Date and Modalities (Distances) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto', marginBottom: expanded ? 14 : 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 6 : 8, marginTop: 'auto', marginBottom: expanded ? (isMobile ? 10 : 14) : 0 }}>
           {/* Date */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(155,200,169,0.6)', fontFamily: "'Inter', sans-serif", fontSize: 13 }}>
-            <Calendar size={13} />
-            <span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'rgba(155,200,169,0.6)', fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 11 : 13 }}>
+            <Calendar size={isMobile ? 11 : 13} style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {exp.date_label || (() => {
                 if (!exp.start_date || !exp.end_date) return '';
                 const sd = new Date(exp.start_date + 'T12:00:00Z');
@@ -111,14 +121,14 @@ function ExpeditionCard({ exp, navigate }) {
           </div>
           
           {/* Modalities */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? 4 : 6 }}>
             {exp.modalities?.map(m => (
               <span key={m} style={{
-                fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700,
+                fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 9.5 : 11, fontWeight: 700,
                 color: '#9bc8a9',
                 background: 'rgba(0,65,64,0.35)',
                 border: '1px solid rgba(155,200,169,0.25)',
-                borderRadius: 99, padding: '3px 9px', letterSpacing: '0.05em'
+                borderRadius: 99, padding: isMobile ? '2px 7px' : '3px 9px', letterSpacing: '0.05em'
               }}>
                 {m}
               </span>
@@ -225,7 +235,7 @@ function buildTimelineRows(upcoming, isMobile = false) {
   return rows;
 }
 
-function TimelineRow({ row, navigate }) {
+function TimelineRow({ row, navigate, isMobile = false }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -245,13 +255,16 @@ function TimelineRow({ row, navigate }) {
     return () => window.removeEventListener('resize', handleScroll);
   }, [row]);
 
+  const scrollStep = isMobile ? 184 : 292;
   const scrollLeft = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: -292, behavior: 'smooth' });
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: -scrollStep, behavior: 'smooth' });
   };
 
   const scrollRight = () => {
-    if (scrollRef.current) scrollRef.current.scrollBy({ left: 292, behavior: 'smooth' });
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: scrollStep, behavior: 'smooth' });
   };
+
+  const rowGap = isMobile ? 12 : 24;
 
   return (
     <div className="reveal year-block" style={{ position: 'relative' }}>
@@ -261,9 +274,9 @@ function TimelineRow({ row, navigate }) {
         className="timeline-horizontal-scroll"
         style={{
           display: 'flex',
-          gap: 24,
+          gap: rowGap,
           overflowX: 'auto',
-          paddingBottom: 16,
+          paddingBottom: isMobile ? 8 : 16,
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
@@ -283,9 +296,9 @@ function TimelineRow({ row, navigate }) {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  height: 76,
-                  marginBottom: 16,
-                  padding: '12px 0',
+                  height: isMobile ? 42 : 76,
+                  marginBottom: isMobile ? 8 : 16,
+                  padding: isMobile ? '4px 0' : '12px 0',
                   borderBottom: seg.showYearHeader ? '1px solid rgba(218,184,63,0.12)' : '1px solid transparent',
                 }}
               >
@@ -294,7 +307,7 @@ function TimelineRow({ row, navigate }) {
                     style={{
                       fontFamily: "'Alumni Sans', sans-serif",
                       fontStyle: 'italic',
-                      fontSize: 64,
+                      fontSize: isMobile ? 38 : 64,
                       fontWeight: 900,
                       color: '#dab83f',
                       margin: 0,
@@ -314,7 +327,7 @@ function TimelineRow({ row, navigate }) {
               <div
                 style={{
                   position: 'absolute',
-                  top: 12,
+                  top: isMobile ? 9 : 12,
                   left: 0,
                   right: 0,
                   height: 2,
@@ -323,21 +336,21 @@ function TimelineRow({ row, navigate }) {
                 }}
               />
 
-              <div style={{ display: 'flex', gap: 24 }}>
+              <div style={{ display: 'flex', gap: rowGap }}>
                 {seg.months.map(({ month, exps }) => (
                   <div key={`${seg.year}-${month}`} style={{ display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
                     {/* Month Node */}
-                    <div style={{ position: 'relative', height: 56 }}>
+                    <div style={{ position: 'relative', height: isMobile ? 38 : 56 }}>
                       <div
                         style={{
                           position: 'absolute',
                           top: 4,
                           left: 0,
-                          width: 18,
-                          height: 18,
+                          width: isMobile ? 12 : 18,
+                          height: isMobile ? 12 : 18,
                           borderRadius: '50%',
                           background: '#080d18',
-                          border: '4px solid #9bc8a9',
+                          border: isMobile ? '3px solid #9bc8a9' : '4px solid #9bc8a9',
                           boxShadow: '0 0 16px rgba(155,200,169,0.5)',
                           zIndex: 2,
                         }}
@@ -345,10 +358,10 @@ function TimelineRow({ row, navigate }) {
                       <h4
                         style={{
                           fontFamily: "'Inter', sans-serif",
-                          fontSize: 20,
+                          fontSize: isMobile ? 14 : 20,
                           fontWeight: 500,
                           color: '#f1f5f9',
-                          margin: '36px 0 0 0',
+                          margin: isMobile ? '20px 0 0 0' : '36px 0 0 0',
                           letterSpacing: '0.05em',
                           whiteSpace: 'nowrap',
                         }}
@@ -358,10 +371,10 @@ function TimelineRow({ row, navigate }) {
                     </div>
 
                     {/* Cards deste mês */}
-                    <div style={{ display: 'flex', gap: 24, marginTop: 16, alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', gap: rowGap, marginTop: isMobile ? 8 : 16, alignItems: 'flex-start' }}>
                       {exps.map((exp, i) => (
                         <div key={exp.id} className="reveal" style={{ flexShrink: 0, transitionDelay: `${i * 80}ms` }}>
-                          <ExpeditionCard exp={exp} navigate={navigate} />
+                          <ExpeditionCard exp={exp} navigate={navigate} isMobile={isMobile} />
                         </div>
                       ))}
                     </div>
@@ -378,17 +391,17 @@ function TimelineRow({ row, navigate }) {
         <div
           style={{
             position: 'absolute',
-            top: rowHasAnyYearHeader ? 130 : 40,
-            left: -24,
-            bottom: 16,
-            width: 100,
+            top: rowHasAnyYearHeader ? (isMobile ? 84 : 130) : 40,
+            left: isMobile ? -12 : -24,
+            bottom: isMobile ? 8 : 16,
+            width: isMobile ? 64 : 100,
             background: 'linear-gradient(to left, transparent, rgba(6,14,24,0.95) 80%)',
             pointerEvents: 'none',
             zIndex: 5,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
-            paddingLeft: 16,
+            paddingLeft: isMobile ? 8 : 16,
           }}
         >
           <button
@@ -402,15 +415,15 @@ function TimelineRow({ row, navigate }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 44,
-              height: 44,
+              width: isMobile ? 34 : 44,
+              height: isMobile ? 34 : 44,
               borderRadius: '50%',
               background: 'rgba(218,184,63,0.12)',
               color: '#dab83f',
               backdropFilter: 'blur(4px)',
             }}
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={isMobile ? 16 : 20} />
           </button>
         </div>
       )}
@@ -419,17 +432,17 @@ function TimelineRow({ row, navigate }) {
         <div
           style={{
             position: 'absolute',
-            top: rowHasAnyYearHeader ? 130 : 40,
+            top: rowHasAnyYearHeader ? (isMobile ? 84 : 130) : 40,
             right: 0,
-            bottom: 16,
-            width: 100,
+            bottom: isMobile ? 8 : 16,
+            width: isMobile ? 64 : 100,
             background: 'linear-gradient(to right, transparent, rgba(6,14,24,0.95) 80%)',
             pointerEvents: 'none',
             zIndex: 5,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
-            paddingRight: 8,
+            paddingRight: isMobile ? 4 : 8,
           }}
         >
           <button
@@ -443,15 +456,15 @@ function TimelineRow({ row, navigate }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 44,
-              height: 44,
+              width: isMobile ? 34 : 44,
+              height: isMobile ? 34 : 44,
               borderRadius: '50%',
               background: 'rgba(218,184,63,0.12)',
               color: '#dab83f',
               backdropFilter: 'blur(4px)',
             }}
           >
-            <ArrowRight size={20} />
+            <ArrowRight size={isMobile ? 16 : 20} />
           </button>
         </div>
       )}
@@ -499,8 +512,8 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
   const timelineRows = buildTimelineRows(upcoming, isMobile);
 
   return (
-    <section id="expedicoes" style={{ padding: '80px 24px', maxWidth: 1200, margin: '0 auto' }}>
-      <div className="reveal expedition-header" style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 32 }}>
+    <section id="expedicoes" style={{ padding: isMobile ? '40px 20px' : '64px 24px', maxWidth: 1200, margin: '0 auto' }}>
+      <div className="reveal expedition-header" style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: isMobile ? 20 : 32 }}>
         <div>
 
           <h2 className="section-title" style={{ margin: 0 }}>
@@ -508,16 +521,16 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
           </h2>
         </div>
         <div className="header-divider" style={{ width: 1, height: 80, background: 'rgba(241,245,249,0.2)' }} />
-        <p style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 24, fontWeight: 400, color: 'rgba(241,245,249,0.75)', maxWidth: 420, margin: 0, lineHeight: 1.2, letterSpacing: '0.05em' }}>
+        <p style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: isMobile ? 20 : 24, fontWeight: 400, color: 'rgba(241,245,249,0.75)', maxWidth: 420, margin: 0, lineHeight: 1.2, letterSpacing: '0.05em' }}>
           {t('expedicoes_subtitulo')}
         </p>
       </div>
 
       {loading ? (
-        <div aria-busy="true" aria-label="Carregando expedições" style={{ display: 'flex', gap: 24, overflow: 'hidden' }}>
+        <div aria-busy="true" aria-label="Carregando expedições" style={{ display: 'flex', gap: isMobile ? 12 : 24, overflow: 'hidden' }}>
           {[0, 1, 2, 3].map(i => (
             <div key={i} className="jt-skeleton" style={{
-              flexShrink: 0, width: 268, height: 270, borderRadius: 20,
+              flexShrink: 0, width: isMobile ? 172 : 268, height: isMobile ? 192 : 270, borderRadius: isMobile ? 14 : 20,
               background: 'rgba(18,65,92,0.12)', border: '1px solid rgba(155,200,169,0.1)',
               animationDelay: `${i * 150}ms`,
             }} />
@@ -528,9 +541,9 @@ export default function ExpeditionsGrid({ expeditions, loading, navigate }) {
           {t('expedicoes_vazio')}
         </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 20 : 36 }}>
           {timelineRows.map((row, idx) => (
-            <TimelineRow key={idx} row={row} navigate={navigate} />
+            <TimelineRow key={idx} row={row} navigate={navigate} isMobile={isMobile} />
           ))}
         </div>
       )}

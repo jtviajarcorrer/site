@@ -19,7 +19,7 @@ export default function HomePage({ expeditions, loading, navigate }) {
       <ExpeditionsGrid expeditions={expeditions} loading={loading} navigate={navigate} />
 
       {/* Sobre a JT */}
-      <section id="sobre" className="home-sobre-section" style={{ padding: '100px 24px' }}>
+      <section id="sobre" className="home-sobre-section" style={{ padding: '64px 24px 36px' }}>
         <div className="home-sobre-grid" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 60, alignItems: 'flex-start' }}>
           <div className="reveal">
 
@@ -77,10 +77,10 @@ export default function HomePage({ expeditions, loading, navigate }) {
       <style>{`
         @media (max-width: 768px) {
           .home-sobre-section {
-            padding: 56px 20px !important;
+            padding: 40px 20px 20px !important;
           }
           .home-sobre-grid {
-            gap: 40px !important;
+            gap: 32px !important;
           }
         }
       `}</style>

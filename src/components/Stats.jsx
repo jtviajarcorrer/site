@@ -138,9 +138,10 @@ export default function Stats({ expeditions = [] }) {
   return (
     <section
       ref={sectionRef}
+      className="stats-section"
       style={{
         position: 'relative',
-        padding: '120px 24px',
+        padding: '56px 24px 80px',
         overflow: 'hidden',
       }}
     >
@@ -198,7 +199,7 @@ export default function Stats({ expeditions = [] }) {
       </div>
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
-        <div className="reveal" style={{ textAlign: 'center', marginBottom: 56 }}>
+        <div className="reveal stats-header" style={{ textAlign: 'center', marginBottom: 44 }}>
           <h2 className="section-title" style={{ marginBottom: 12 }}>
             {rich('comunidade_titulo', [GOLD_TEXT])}
           </h2>
@@ -217,6 +218,7 @@ export default function Stats({ expeditions = [] }) {
         </div>
 
         <div
+          className="stats-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -226,7 +228,7 @@ export default function Stats({ expeditions = [] }) {
           {stats.map((stat, i) => (
             <div
               key={stat.id}
-              className="reveal"
+              className="reveal stats-card"
               style={{
                 transitionDelay: `${i * 100}ms`,
                 textAlign: 'center',
@@ -272,6 +274,7 @@ export default function Stats({ expeditions = [] }) {
 
               {/* Medalhão do ícone */}
               <div
+                className="stats-icon-box"
                 style={{
                   width: 60,
                   height: 60,
@@ -292,6 +295,7 @@ export default function Stats({ expeditions = [] }) {
               </div>
 
               <div
+                className="stats-number"
                 style={{
                   fontFamily: "'Alumni Sans', sans-serif",
                   fontStyle: 'italic',
@@ -308,6 +312,7 @@ export default function Stats({ expeditions = [] }) {
               </div>
 
               <div
+                className="stats-label"
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 13,
@@ -323,6 +328,44 @@ export default function Stats({ expeditions = [] }) {
           ))}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .stats-section {
+            padding: 24px 16px 48px !important;
+          }
+          .stats-header {
+            margin-bottom: 24px !important;
+          }
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .stats-card {
+            padding: 20px 12px 18px !important;
+            border-radius: 16px !important;
+          }
+          .stats-icon-box {
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 12px !important;
+            margin-bottom: 10px !important;
+          }
+          .stats-icon-box svg {
+            width: 22px !important;
+            height: 22px !important;
+          }
+          .stats-number {
+            font-size: clamp(32px, 8.5vw, 42px) !important;
+            margin-bottom: 4px !important;
+          }
+          .stats-label {
+            font-size: 11px !important;
+            letter-spacing: 0.06em !important;
+            line-height: 1.25 !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

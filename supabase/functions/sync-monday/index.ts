@@ -26,6 +26,7 @@ const COL = {
   vagas: 'numeric_mm4tf2nf', // Qt Pax Pagantes (BI)
   destaque: 'boolean_mm4b8z5m',
   fotos: 'file_mm81ydad',
+  atracoes: 'board_relation_mkmvkhy0',
 };
 // Colunas do quadro Produto
 const PROD = {
@@ -177,15 +178,32 @@ async function fetchItinerario(expeditionId: string): Promise<Any[]> {
 }
 
 // Dados das atrações (fotos já copiadas para o Storage), com cache por atração.
-type AtrInfo = { name: string; tipo: string; stars: number | null; site: string | null; photos: string[] };
-const ATR_COLS = { foto: ATR_FOTO, tipo: 'label_mkmt7614', estrelas: 'avalia__o_mkn46hc8', site: 'link_mknbkt85' };
+type AtrInfo = {
+  name: string;
+  tipo: string;
+  stars: number | null;
+  site: string | null;
+  description: string | null;
+  distances: string[];
+  photos: string[];
+};
+const ATR_COLS = {
+  foto: ATR_FOTO,
+  tipo: 'label_mkmt7614',
+  estrelas: 'avalia__o_mkn46hc8',
+  site: 'link_mknbkt85',
+  descSite: 'long_text_mm8xpgk1',
+  comentario: 'texto_longo_mkn44j6x',
+  distancias: 'lista_suspensa_mkmvxfs7',
+};
+const ATR_COL_LIST = Object.values(ATR_COLS).map((c) => `"${c}"`).join(',');
 
 async function attractionPhotos(sb: Any, ids: string[], cache: Map<string, AtrInfo>, summary: Any): Promise<void> {
   const missing = ids.filter((i) => !cache.has(i));
   for (let i = 0; i < missing.length; i += 100) {
     const chunk = missing.slice(i, i + 100);
     const data = await monday(
-      `query ($ids: [ID!]) { items(ids: $ids) { id name column_values(ids: ["${ATR_COLS.foto}","${ATR_COLS.tipo}","${ATR_COLS.estrelas}","${ATR_COLS.site}"]) { id text value } } }`,
+      `query ($ids: [ID!]) { items(ids: $ids) { id name column_values(ids: [${ATR_COL_LIST}]) { id text value } } }`,
       { ids: chunk },
     );
     for (const it of data.items) {
@@ -202,31 +220,46 @@ async function attractionPhotos(sb: Any, ids: string[], cache: Map<string, AtrIn
         }
       }
       const stars = parseInt(text(it, ATR_COLS.estrelas), 10);
-      const siteUrl = (parseJson(col(it, ATR_COLS.site)?.value)?.url ?? '').trim();
+      const siteUrl = (parseJson(col(it, ATR_COLS.site)?.value)?.url ?? '').trim() || text(it, ATR_COLS.site);
+      const desc = normalizeText(text(it, ATR_COLS.descSite)) || normalizeText(text(it, ATR_COLS.comentario)) || null;
+      const distances = text(it, ATR_COLS.distancias).split(',').map((s) => s.trim()).filter(Boolean);
       cache.set(String(it.id), {
         name: it.name,
         tipo: text(it, ATR_COLS.tipo),
         stars: Number.isFinite(stars) && stars > 0 ? stars : null,
         site: siteUrl || null,
+        description: desc,
+        distances,
         photos: urls,
       });
     }
-    for (const id of chunk) if (!cache.has(id)) cache.set(id, { name: '', tipo: '', stars: null, site: null, photos: [] });
+    for (const id of chunk) {
+      if (!cache.has(id)) {
+        cache.set(id, { name: '', tipo: '', stars: null, site: null, description: null, distances: [], photos: [] });
+      }
+    }
   }
 }
 
 const dayNumber = (isoDate: string, startDate: string) =>
   Math.round((Date.parse(isoDate + 'T00:00:00Z') - Date.parse(startDate + 'T00:00:00Z')) / 86400000) + 1;
 
-async function syncDays(sb: Any, expeditionId: string, startDate: string, summary: Any, photoCache: Map<string, AtrInfo>): Promise<number> {
+async function syncDays(
+  sb: Any,
+  expeditionId: string,
+  startDate: string,
+  roteiroAtrIds: string[],
+  summary: Any,
+  photoCache: Map<string, AtrInfo>,
+): Promise<number> {
   const all = await fetchItinerario(expeditionId);
   const marked = all.filter((it) => {
     const v = parseJson(col(it, ITIN.site)?.value)?.checked;
     return v === true || v === 'true';
   });
 
-  const atrIds = new Set<string>();
-  for (const it of marked) for (const a of col(it, ITIN.atracoes)?.linked_item_ids ?? []) atrIds.add(String(a));
+  const atrIds = new Set<string>(roteiroAtrIds.map(String));
+  for (const it of all) for (const a of col(it, ITIN.atracoes)?.linked_item_ids ?? []) atrIds.add(String(a));
   if (atrIds.size) await attractionPhotos(sb, [...atrIds], photoCache, summary);
 
   const rows: Any[] = [];
@@ -266,8 +299,35 @@ async function syncDays(sb: Any, expeditionId: string, startDate: string, summar
       stays.push({ name: info.name, stars: info.stars, website: info.site, photos: info.photos });
     }
   }
-  const { error: stayErr } = await sb.from('expeditions').update({ stays }).eq('id', expeditionId);
-  if (stayErr) throw new Error('gravar hospedagens: ' + stayErr.message);
+
+  // Provas de Corrida: atrações do tipo "Prova de Corrida" (exceto itens de "Expo ...") ligadas ao Roteiro ou ao Itinerário
+  const raceCandidateIds: string[] = [...roteiroAtrIds.map(String)];
+  const allByDate = [...all].sort((a, b) => text(a, ITIN.dia).localeCompare(text(b, ITIN.dia)));
+  for (const it of allByDate) {
+    for (const a of col(it, ITIN.atracoes)?.linked_item_ids ?? []) raceCandidateIds.push(String(a));
+  }
+  const rawRaces: Any[] = [];
+  const seenRace = new Set<string>();
+  for (const aId of raceCandidateIds) {
+    if (seenRace.has(aId)) continue;
+    const info = photoCache.get(aId);
+    if (!info || info.tipo !== 'Prova de Corrida') continue;
+    if (/^expo\b/i.test(info.name.trim())) continue;
+    seenRace.add(aId);
+    rawRaces.push({
+      id: aId,
+      name: info.name,
+      website: info.site,
+      description: info.description,
+      distances: info.distances,
+      photos: info.photos,
+    });
+  }
+  const hasRichRace = rawRaces.some((r) => r.description || r.website);
+  const races = hasRichRace ? rawRaces.filter((r) => r.description || r.website) : rawRaces.slice(0, 1);
+
+  const { error: stayErr } = await sb.from('expeditions').update({ stays, races }).eq('id', expeditionId);
+  if (stayErr) throw new Error('gravar hospedagens/provas: ' + stayErr.message);
 
   // Grava os atuais e remove os que saíram do Monday / foram desmarcados (inclui dados antigos sem monday_item_id)
   if (rows.length) {
@@ -483,7 +543,8 @@ Deno.serve(async (req: Request) => {
 
         // Roteiro dia a dia (quadro Itinerário) — falha aqui não derruba a expedição
         try {
-          const n = await syncDays(sb, id, cron.from, summary, photoCache);
+          const roteiroAtrIds = (col(it, COL.atracoes)?.linked_item_ids ?? []).map(String);
+          const n = await syncDays(sb, id, cron.from, roteiroAtrIds, summary, photoCache);
           summary.days = (summary.days ?? 0) + n;
         } catch (e) {
           summary.errors.push({ id, name, etapa: 'roteiro', erro: String((e as Error).message ?? e) });

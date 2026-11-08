@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, Star, Volume2, VolumeX } from 'lucide-react';
-import { useT } from '../content/SiteTexts.jsx';
+import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 
 const InstagramIcon = ({ size = 13, color = '#dab83f' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -30,7 +29,6 @@ const TESTIMONIAL_VIDEOS = [
 ];
 
 export default function VideoCarousel() {
-  const { t } = useT();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -447,7 +445,7 @@ export default function VideoCarousel() {
           </div>
 
           {/* Traveler Info */}
-          <div className="video-info-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: '1 1 240px', paddingTop: 38 }}>
+          <div className="video-info-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', flex: '1 1 240px', paddingTop: 38 }}>
             <div>
               <div style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 32, fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.02em', lineHeight: 1 }}>
                 {activeVideo.name}
@@ -458,36 +456,6 @@ export default function VideoCarousel() {
               <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: 'rgba(241,245,249,0.8)', fontStyle: 'italic', lineHeight: 1.6, margin: '12px 0 0' }}>
                 {activeVideo.quote}
               </p>
-            </div>
-            <div
-              className="video-nps-card"
-              style={{ 
-                marginTop: 20,
-                alignSelf: 'flex-end',
-                background: 'rgba(18,65,92,0.15)', 
-                border: '1px solid rgba(155,200,169,0.1)', 
-                borderRadius: 14, 
-                padding: '12px 14px', 
-                maxWidth: 235,
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 10,
-                transition: 'border-color 0.3s, background 0.3s' 
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,65,64,0.25)'; e.currentTarget.style.borderColor = 'rgba(218,184,63,0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(18,65,92,0.15)'; e.currentTarget.style.borderColor = 'rgba(155,200,169,0.1)'; }}
-            >
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(218,184,63,0.08)', border: '1px solid rgba(218,184,63,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                <Star size={16} color="#dab83f" />
-              </div>
-              <div>
-                <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 19, fontWeight: 700, textTransform: 'uppercase', color: '#f1f5f9', margin: '0 0 4px', lineHeight: 1.05 }}>
-                  {t('nps_titulo')}
-                </h3>
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: 'rgba(155,200,169,0.55)', lineHeight: 1.45, margin: 0 }}>
-                  {t('nps_texto')}
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -505,15 +473,14 @@ export default function VideoCarousel() {
           animation: fadeInScale 0.4s ease-out forwards;
         }
         @media (max-width: 640px) {
+          .video-card-enter {
+            gap: 16px !important;
+          }
           .video-player-col {
             margin: 0 auto !important;
           }
           .video-info-col {
             padding-top: 4px !important;
-          }
-          .video-nps-card {
-            align-self: stretch !important;
-            max-width: 100% !important;
           }
         }
       `}</style>

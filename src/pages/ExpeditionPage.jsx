@@ -452,6 +452,63 @@ export default function ExpeditionPage({ expedition, navigate }) {
             </section>
           )}
 
+          {/* Prova de Corrida */}
+          {Array.isArray(exp.races) && exp.races.length > 0 && (
+            <section className="exp-section" style={{ marginBottom: 56 }}>
+              <SectionTitle>{t('exp_prova_titulo')}</SectionTitle>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {exp.races.map((r, i) => (
+                  <div
+                    key={r.id || i}
+                    className="exp-card-pad"
+                    style={{
+                      background: T.bgCard,
+                      border: `1px solid ${T.border}`,
+                      borderRadius: 16,
+                      padding: 24,
+                      boxShadow: T.shadow,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                      <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', color: T.text, margin: 0, letterSpacing: '0.02em', lineHeight: 1.05 }}>
+                        {r.name}
+                      </h3>
+                      {r.website && (
+                        <a
+                          href={r.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: T.accent,
+                            background: T.mintBg,
+                            border: '1px solid rgba(155,200,169,0.4)',
+                            borderRadius: 99,
+                            padding: '6px 14px',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          {t('exp_prova_link')}
+                        </a>
+                      )}
+                    </div>
+                    {r.description && (
+                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: T.textMid, lineHeight: 1.75, margin: '12px 0 0', whiteSpace: 'pre-wrap' }}>
+                        {r.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Itinerary */}
           <section className="exp-section" style={{ marginBottom: 56 }}>
             <SectionTitle>{t('exp_roteiro_titulo')}</SectionTitle>
@@ -726,7 +783,7 @@ function SectionTitle({ children }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
       <div style={{ width: 4, height: 28, borderRadius: 99, background: '#9bc8a9', flexShrink: 0 }} />
-      <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', color: T.text, margin: 0, letterSpacing: '0.02em' }}>
+      <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', color: T.text, margin: 0, letterSpacing: '0.02em', lineHeight: 1.05 }}>
         {children}
       </h2>
     </div>

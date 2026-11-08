@@ -432,6 +432,18 @@
     "text": "Conhecer o hotel →"
   },
   {
+    "key": "exp_prova_titulo",
+    "group": "Página da Expedição",
+    "where": "Título da seção da prova de corrida",
+    "text": "A Prova de Corrida"
+  },
+  {
+    "key": "exp_prova_link",
+    "group": "Página da Expedição",
+    "where": "Link oficial no card da prova de corrida",
+    "text": "Site oficial da prova →"
+  },
+  {
     "key": "exp_roteiro_titulo",
     "group": "Página da Expedição",
     "where": "Título da seção",
