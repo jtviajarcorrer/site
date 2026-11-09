@@ -531,53 +531,15 @@ export default function ExpeditionPage({ expedition, navigate }) {
             <section data-analytics-section="prova" className="exp-section" style={{ marginBottom: 56 }}>
               <SectionTitle>{t('exp_prova_titulo')}</SectionTitle>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
                 {exp.races.map((r, i) => (
-                  <div
-                    key={r.id || i}
-                    className="exp-card-pad"
-                    style={{
-                      background: T.bgCard,
-                      border: `1px solid ${T.border}`,
-                      borderRadius: 16,
-                      padding: 24,
-                      boxShadow: T.shadow,
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                      <h3 style={{ fontFamily: "'Alumni Sans', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', color: T.text, margin: 0, letterSpacing: '0.02em', lineHeight: 1.05 }}>
-                        {r.name}
-                      </h3>
-                      {r.website && (
-                        <a
-                          href={r.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => trackAnalyticsEvent('clicked_race_link', true)}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            fontFamily: "'Inter', sans-serif",
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: T.accent,
-                            background: T.mintBg,
-                            border: '1px solid rgba(155,200,169,0.4)',
-                            borderRadius: 99,
-                            padding: '6px 14px',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          {t('exp_prova_link')}
-                        </a>
-                      )}
-                    </div>
-                    {r.description && (
-                      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: T.textMid, lineHeight: 1.75, margin: '12px 0 0', whiteSpace: 'pre-wrap' }}>
-                        {r.description}
-                      </p>
+                  <div key={r.id || i} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
+                    {(r.logo || r.photos?.[0]) && (
+                      <RaceLogoImage src={r.logo || r.photos[0]} alt={r.name} />
                     )}
+                    <div style={{ padding: '16px 18px 18px' }}>
+                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>{r.name}</div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -933,6 +895,68 @@ export default function ExpeditionPage({ expedition, navigate }) {
 }
 
 /* ─── helpers ─── */
+function RaceLogoImage({ src, alt }) {
+  const [invertWhite, setInvertWhite] = useState(false);
+
+  const handleLoad = (e) => {
+    try {
+      const img = e.currentTarget;
+      const canvas = document.createElement('canvas');
+      canvas.width = 32;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0, 32, 32);
+      const { data } = ctx.getImageData(0, 0, 32, 32);
+      let sumLum = 0;
+      let count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] > 50) {
+          sumLum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          count++;
+        }
+      }
+      if (count > 0 && sumLum / count > 225) {
+        setInvertWhite(true);
+      }
+    } catch {
+      // ignora erro de leitura
+    }
+  };
+
+  return (
+    <div style={{
+      width: '100%',
+      aspectRatio: '4/3',
+      background: '#fff',
+      borderBottom: `1px solid ${T.border}`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px 24px',
+    }}>
+      <img
+        src={imgUrl(src, 640)}
+        alt={alt}
+        crossOrigin="anonymous"
+        loading="lazy"
+        decoding="async"
+        onLoad={handleLoad}
+        style={{
+          maxWidth: '100%',
+          maxHeight: '100%',
+          width: 'auto',
+          height: 'auto',
+          objectFit: 'contain',
+          display: 'block',
+          filter: invertWhite ? 'brightness(0.12)' : 'none',
+          transition: 'filter 0.2s ease',
+        }}
+      />
+    </div>
+  );
+}
+
 function SectionTitle({ children }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>

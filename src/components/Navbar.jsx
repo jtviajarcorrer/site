@@ -11,9 +11,10 @@ const InstagramIcon = () => (
 );
 
 const NAV_LINKS = [
-  { key: 'menu_quem_somos',    href: '#sobre' },
-  { key: 'menu_expedicoes',    href: '#expedicoes' },
-  { key: 'menu_contato',       href: '#contato' },
+  { key: 'menu_perfil_viajantes', href: '#para-quem' },
+  { key: 'menu_quem_somos',       href: '#sobre' },
+  { key: 'menu_expedicoes',       href: '#expedicoes' },
+  { key: 'menu_contato',          href: '#contato' },
 ];
 
 export default function Navbar({ navigate, logoAlwaysVisible = false }) {

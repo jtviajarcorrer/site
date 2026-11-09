@@ -74,14 +74,31 @@ export default function Footer({ navigate }) {
         </div>
 
         {/* Bottom */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
           <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <img src="/logo-jt.png" alt="JT Viajar Correr" style={{ height: 44, width: 'auto', objectFit: 'contain', filter: 'contrast(1.05) brightness(1.1)', opacity: 0.8 }} />
+            <img src="/logo-jt.png" alt="JT Viajar Correr" style={{ height: 44, width: 'auto', objectFit: 'contain', filter: 'contrast(1.05) brightness(1.1)', opacity: 0.85 }} />
           </button>
 
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: 'rgba(15,23,42,0.4)', margin: 0 }}>
-            {t('rodape_copyright', { ano: new Date().getFullYear() })}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px 14px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+              <span><strong style={{ fontWeight: 600 }}>Nome:</strong> JT Viajar Correr</span>
+              <span style={{ opacity: 0.4 }}>•</span>
+              <span><strong style={{ fontWeight: 600 }}>CNPJ:</strong> 44.962.794/0001-40</span>
+              <span style={{ opacity: 0.4 }}>•</span>
+              <span>
+                <strong style={{ fontWeight: 600 }}>E-mail:</strong>{' '}
+                <a href="mailto:contato@justtravel.tur.br" style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}>contato@justtravel.tur.br</a>
+              </span>
+              <span style={{ opacity: 0.4 }}>•</span>
+              <span>
+                <strong style={{ fontWeight: 600 }}>Telefone:</strong>{' '}
+                <a href="https://wa.me/5531996158950" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}>+55 31 99615-8950</a>
+              </span>
+            </div>
+            <p style={{ fontSize: 12.5, color: '#64748b', margin: 0 }}>
+              {t('rodape_copyright', { ano: new Date().getFullYear() })}
+            </p>
+          </div>
 
           <div style={{ display: 'flex', gap: 12 }}>
             {[

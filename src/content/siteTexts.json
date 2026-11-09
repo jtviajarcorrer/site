@@ -1,5 +1,11 @@
 [
   {
+    "key": "menu_perfil_viajantes",
+    "group": "Menu",
+    "where": "Menu superior (Home e páginas)",
+    "text": "Perfil dos Viajantes"
+  },
+  {
     "key": "menu_quem_somos",
     "group": "Menu",
     "where": "Menu superior (Home e páginas)",
@@ -338,8 +344,8 @@
   {
     "key": "rodape_copyright",
     "group": "Rodapé",
-    "where": "Linha de direitos autorais. Use {ano} para o ano atual",
-    "text": "© {ano} Just Travel — Expedições de Corrida. Todos os direitos reservados."
+    "where": "Linha de direitos autorais",
+    "text": "©JT Viajar Correr Experiência Em Viagem Ltda. Todos os direitos reservados."
   },
   {
     "key": "exp_voltar",

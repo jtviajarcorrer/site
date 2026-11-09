@@ -26,6 +26,7 @@ const COL = {
   vagas: 'numeric_mm4tf2nf', // Qt Pax Pagantes (BI)
   destaque: 'boolean_mm4b8z5m',
   fotos: 'file_mm81ydad',
+  logoProva: 'file_mm8xk0pr',
   atracoes: 'board_relation_mkmvkhy0',
 };
 // Colunas do quadro Produto
@@ -118,27 +119,68 @@ const normalizeText = (s: string) => s.replace(/\r\n/g, '\n').trim();
 
 const MIME: Record<string, string> = {
   png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif',
+  cr2: 'image/jpeg', heic: 'image/jpeg', heif: 'image/jpeg',
 };
 
+function parseCr2Header(headBuf: ArrayBuffer): { offset: number; length: number; orientation: number } {
+  const dv = new DataView(headBuf);
+  if (headBuf.byteLength < 16) return { offset: 0, length: 0, orientation: 1 };
+  const le = dv.getUint16(0, false) === 0x4949;
+  const ifd0 = dv.getUint32(4, le);
+  if (ifd0 + 2 > headBuf.byteLength) return { offset: 0, length: 0, orientation: 1 };
+  const entries = dv.getUint16(ifd0, le);
+  let offset = 0;
+  let length = 0;
+  let orientation = 1;
+  for (let i = 0; i < entries; i++) {
+    const pos = ifd0 + 2 + i * 12;
+    if (pos + 12 > headBuf.byteLength) break;
+    const tag = dv.getUint16(pos, le);
+    if (tag === 0x0111) offset = dv.getUint32(pos + 8, le);
+    if (tag === 0x0117) length = dv.getUint32(pos + 8, le);
+    if (tag === 0x0112) orientation = dv.getUint16(pos + 8, le);
+  }
+  return { offset, length, orientation };
+}
+
 // Copia um arquivo do Monday (URL temporária) para o Storage público e devolve a URL permanente.
+// Arquivos RAW Canon (.cr2) têm o JPEG de alta resolução extraído via HTTP Range; arquivos .heic/.heif são convertidos para .jpg.
 async function mirrorAsset(sb: Any, assetId: string, folder: string): Promise<string | null> {
   const data = await monday(`query ($ids: [ID!]!) { assets(ids: $ids) { id name file_extension public_url } }`, { ids: [assetId] });
   const asset = data.assets?.[0];
   if (!asset?.public_url) return null;
-  const ext = String(asset.file_extension || '.jpg').replace('.', '').toLowerCase();
-  if (!MIME[ext]) return null; // ignora arquivos que não são imagem
-  const fileName = `${assetId}.${ext}`;
+  const rawExt = String(asset.file_extension || '.jpg').replace('.', '').toLowerCase();
+  if (!MIME[rawExt]) return null; // ignora arquivos que não são imagem suportada
+  const targetExt = ['cr2', 'heic', 'heif'].includes(rawExt) ? 'jpg' : rawExt;
+  const fileName = `${assetId}.${targetExt}`;
   const path = `${folder}/${fileName}`;
   const { data: pub } = sb.storage.from(BUCKET).getPublicUrl(path);
 
   const { data: listed } = await sb.storage.from(BUCKET).list(folder, { search: fileName, limit: 5 });
   if (listed?.some((f: Any) => f.name === fileName)) return pub.publicUrl; // já copiado antes
 
-  const resp = await fetch(asset.public_url);
-  if (!resp.ok) throw new Error(`download do arquivo ${assetId}: HTTP ${resp.status}`);
-  const buf = await resp.arrayBuffer();
+  let buf: ArrayBuffer;
+  if (rawExt === 'cr2') {
+    const headResp = await fetch(asset.public_url, { headers: { Range: 'bytes=0-8191' } });
+    if (!headResp.ok) throw new Error(`download header CR2 ${assetId}: HTTP ${headResp.status}`);
+    const { offset, length } = parseCr2Header(await headResp.arrayBuffer());
+    if (!offset || !length) throw new Error(`CR2 ${assetId} sem preview JPEG embutido`);
+    const jpgResp = await fetch(asset.public_url, { headers: { Range: `bytes=${offset}-${offset + length - 1}` } });
+    if (!jpgResp.ok) throw new Error(`download preview CR2 ${assetId}: HTTP ${jpgResp.status}`);
+    buf = await jpgResp.arrayBuffer();
+  } else if (rawExt === 'heic' || rawExt === 'heif') {
+    const convUrl = `https://wsrv.nl/?url=${encodeURIComponent(asset.public_url)}&output=jpg&q=85&w=2000`;
+    const resp = await fetch(convUrl);
+    if (!resp.ok) throw new Error(`conversão HEIC ${assetId}: HTTP ${resp.status}`);
+    buf = await resp.arrayBuffer();
+  } else {
+    const resp = await fetch(asset.public_url);
+    if (!resp.ok) throw new Error(`download do arquivo ${assetId}: HTTP ${resp.status}`);
+    buf = await resp.arrayBuffer();
+  }
+
   const { error } = await sb.storage.from(BUCKET).upload(path, buf, {
-    contentType: MIME[ext], upsert: true, cacheControl: '31536000',
+    contentType: MIME[rawExt], upsert: true, cacheControl: '31536000',
   });
   if (error) throw new Error(`upload ${path}: ${error.message}`);
   return pub.publicUrl;
@@ -249,6 +291,7 @@ async function syncDays(
   expeditionId: string,
   startDate: string,
   roteiroAtrIds: string[],
+  raceLogoUrl: string | null,
   summary: Any,
   photoCache: Map<string, AtrInfo>,
 ): Promise<number> {
@@ -323,8 +366,24 @@ async function syncDays(
       photos: info.photos,
     });
   }
-  const hasRichRace = rawRaces.some((r) => r.description || r.website);
-  const races = hasRichRace ? rawRaces.filter((r) => r.description || r.website) : rawRaces.slice(0, 1);
+  const hasRichRace = rawRaces.some((r) => (r.photos && r.photos.length > 0) || r.description || r.website);
+  const races = hasRichRace ? rawRaces.filter((r) => (r.photos && r.photos.length > 0) || r.description || r.website) : rawRaces.slice(0, 1);
+  if (raceLogoUrl) {
+    if (races.length > 0) {
+      races[0] = {
+        ...races[0],
+        logo: raceLogoUrl,
+        photos: [raceLogoUrl, ...(races[0].photos ?? []).filter((u: string) => u !== raceLogoUrl)],
+      };
+    } else {
+      races.push({
+        id: `${expeditionId}-race`,
+        name: 'Prova de Corrida',
+        logo: raceLogoUrl,
+        photos: [raceLogoUrl],
+      });
+    }
+  }
 
   const { error: stayErr } = await sb.from('expeditions').update({ stays, races }).eq('id', expeditionId);
   if (stayErr) throw new Error('gravar hospedagens/provas: ' + stayErr.message);
@@ -600,8 +659,18 @@ Deno.serve(async (req: Request) => {
 
         // Roteiro dia a dia (quadro Itinerário) — falha aqui não derruba a expedição
         try {
+          let raceLogoUrl: string | null = null;
+          const logoFile = parseJson(col(it, COL.logoProva)?.value)?.files?.[0];
+          if (logoFile?.assetId) {
+            try {
+              raceLogoUrl = await mirrorAsset(sb, String(logoFile.assetId), `${id}/logo`);
+              if (raceLogoUrl) summary.images++;
+            } catch (e) {
+              summary.errors.push({ id, name, etapa: 'logo da prova', erro: String((e as Error).message ?? e) });
+            }
+          }
           const roteiroAtrIds = (col(it, COL.atracoes)?.linked_item_ids ?? []).map(String);
-          const n = await syncDays(sb, id, cron.from, roteiroAtrIds, summary, photoCache);
+          const n = await syncDays(sb, id, cron.from, roteiroAtrIds, raceLogoUrl, summary, photoCache);
           summary.days = (summary.days ?? 0) + n;
         } catch (e) {
           summary.errors.push({ id, name, etapa: 'roteiro', erro: String((e as Error).message ?? e) });
