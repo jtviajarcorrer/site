@@ -229,14 +229,7 @@ function DayItem({ g, defaultOpen = false, isLast = false }) {
       {open && (
         <ul className="exp-day-list" style={{ listStyle: 'none', margin: '0 0 20px 54px', padding: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
           {g.items.map(it => (
-            <li key={it.id} className="exp-day-item" style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-              {it.start_time ? (
-                <span className="exp-day-time" style={{ minWidth: 78, fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, color: T.accent, paddingTop: 2 }}>
-                  {it.end_time ? `${it.start_time}–${it.end_time}` : it.start_time}
-                </span>
-              ) : (
-                <span className="exp-day-time exp-day-time-empty" style={{ minWidth: 78 }} />
-              )}
+            <li key={it.id} className="exp-day-item" style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 600, color: T.text, lineHeight: 1.5 }}>{it.title}</div>
                 {it.description && (
