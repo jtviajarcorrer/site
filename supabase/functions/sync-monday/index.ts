@@ -39,6 +39,7 @@ const PROD = {
   naoIncluso: 'id_clausula_a_b',
   siteNaoIncluso: 'text_mm81d3xb',
   status: 'color_mkt6h3gf',
+  tipo: 'color_mm90g852',
   // Quadro Destinos: arquivo "capa" — é daqui que o ADV pega o fundo da expedição
   destinoCapa: 'file_mm1ww2gr',
 };
@@ -93,7 +94,8 @@ async function fetchItemsByIds(ids: string[]): Promise<Map<string, Any>> {
   return map;
 }
 
-// Produto "Principal" de um Roteiro: coluna Roteiro (quadro Produto) aponta para o Roteiro e Status Produto = Principal.
+// Produto "Principal" do tipo "Twin" de um Roteiro: coluna Roteiro (quadro Produto) aponta para o Roteiro,
+// Coluna Tipo (color_mm90g852) = "Twin" e Status Produto = "Principal".
 const BOARD_PRODUTO = 8160254865;
 const PROD_ROTEIRO_COL = 'conectar_quadros_mkkwctha';
 async function fetchPrincipalProduct(roteiroId: string): Promise<Any | null> {
@@ -102,7 +104,15 @@ async function fetchPrincipalProduct(roteiroId: string): Promise<Any | null> {
     `query { boards(ids: [${BOARD_PRODUTO}]) { items_page(limit: 100, query_params: { rules: [${rule}] }) { items { id name column_values(ids: [${PRODUTO_COLUMNS}]) { id type text value } } } } }`,
   );
   const items: Any[] = data.boards[0].items_page.items;
-  return items.find((p) => text(p, PROD.status) === 'Principal') ?? null;
+  const isTwin = (p: Any) => text(p, PROD.tipo).toLowerCase() === 'twin';
+  const isPrincipal = (p: Any) => text(p, PROD.status) === 'Principal';
+  return (
+    items.find((p) => isTwin(p) && isPrincipal(p)) ??
+    items.find((p) => isTwin(p) && !['Finalizado', 'Cancelado'].includes(text(p, PROD.status))) ??
+    items.find((p) => isTwin(p)) ??
+    items.find((p) => isPrincipal(p)) ??
+    null
+  );
 }
 
 const col = (item: Any, id: string) => item.column_values.find((c: Any) => c.id === id);
@@ -563,18 +573,23 @@ Deno.serve(async (req: Request) => {
         if (usedSlugs.has(slug)) slug = `${slug}-${id}`;
         usedSlugs.add(slug);
 
-        // Preço "a partir de" = menor Vlr. à Vista entre os produtos ainda ativos (senão, entre todos)
+        // Preço "a partir de" = menor Vlr. à Vista entre os produtos do tipo Twin ainda ativos (senão, entre todos os Twin / ativos)
         const produtos = (col(it, COL.produto)?.linked_item_ids ?? []).map((p: Any) => linked.get(String(p))).filter(Boolean);
-        const comPreco = produtos
+        const produtosTwin = produtos.filter((p: Any) => text(p, PROD.tipo).toLowerCase() === 'twin');
+        const baseProdutos = produtosTwin.length ? produtosTwin : produtos;
+        const comPreco = baseProdutos
           .map((p: Any) => ({ p, preco: parseFloat(text(p, PROD.aVista)) }))
           .filter((x: Any) => x.preco > 0);
         const ativos = comPreco.filter((x: Any) => !['Finalizado', 'Cancelado'].includes(text(x.p, PROD.status)));
         const pool = (ativos.length ? ativos : comPreco).sort((a: Any, b: Any) => a.preco - b.preco);
         const maisBarato = pool[0];
 
-        // O que está incluso / não incluso: produto com Status Produto = "Principal" ligado a este Roteiro
-        // (coluna Roteiro do quadro Produto). Sem produto Principal, as duas listas ficam vazias.
-        const principal = await fetchPrincipalProduct(id);
+        // O que está incluso / não incluso e valores: produto do tipo "Twin" (color_mm90g852) ligado a este Roteiro
+        const principal =
+          (await fetchPrincipalProduct(id)) ??
+          produtosTwin.find((p: Any) => text(p, PROD.status) === 'Principal') ??
+          produtosTwin[0] ??
+          null;
         const incluso = principal ? normalizeText(text(principal, PROD.incluso)) : '';
         const naoIncluso = principal ? normalizeText(text(principal, PROD.siteNaoIncluso)) : '';
         if (!principal) summary.skipped.push({ id, name, motivo: 'sem produto Principal — incluso/não incluso/parcelamento ficam vazios' });
