@@ -241,6 +241,16 @@ export function trackFormStart(draft = null) {
 }
 
 export function trackFormConversion({ firstName, email, phone, instagram } = {}) {
+  try {
+    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+      window.fbq('track', 'Lead', {
+        content_name: currentSession?.expeditionName || document.title || 'JT Expedição',
+        content_category: currentSession?.expeditionSlug || window.location.pathname || '/',
+      });
+    }
+  } catch {
+    // ignore
+  }
   if (!currentSession) return;
   currentSession.sawForm = true;
   currentSession.startedForm = true;
@@ -267,10 +277,24 @@ export function trackAnalyticsEvent(eventName, value = true) {
   flushAnalytics(false);
 }
 
+let hasInitialMetaPageView = false;
+
 export function startPageAnalytics({ pagePath, pageType, expeditionSlug = null, expeditionName = null }) {
   if (currentSession) {
     flushAnalytics(true);
     if (currentSession.cleanup) currentSession.cleanup();
+  }
+
+  try {
+    if (hasInitialMetaPageView) {
+      if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+        window.fbq('track', 'PageView');
+      }
+    } else {
+      hasInitialMetaPageView = true;
+    }
+  } catch {
+    // ignore
   }
 
   const utm = parseAndPersistAttribution();
