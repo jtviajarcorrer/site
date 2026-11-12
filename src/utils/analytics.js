@@ -62,6 +62,28 @@ function parseAndPersistAttribution() {
     const sp = new URLSearchParams(window.location.search);
     const fbclid = sp.get('fbclid');
     const gclid = sp.get('gclid');
+    const cleanSlug = (window.location.pathname || '').replace(/^\/+|\/+$/g, '').toLowerCase();
+    const isBioPage = cleanSlug === 'links' || cleanSlug === 'bio' || cleanSlug === 'linktree';
+    const isAutoIgBio =
+      sp.get('utm_content') === 'link_in_bio' ||
+      (sp.get('utm_source') === 'ig' && sp.get('utm_medium') === 'social');
+
+    // Se a pessoa entrou pela página de Link da Bio (/links, /bio, /linktree) ou veio com a UTM automática
+    // que o próprio app do Instagram injeta ao clicar no link da bio (utm_source=ig&utm_medium=social&utm_content=link_in_bio),
+    // atribui sempre os rótulos oficiais do quadro de Funil do Monday para Instagram Bio.
+    if (isBioPage || isAutoIgBio) {
+      const bioAttr = {
+        utm_source: 'Instagram',
+        utm_medium: 'Organic',
+        utm_campaign: 'Insta Bio',
+        utm_content: 'Instagram_Bio',
+        utm_term: 'Instagram_Bio',
+        ad_click_id: fbclid || gclid || null,
+      };
+      sessionStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(bioAttr));
+      return bioAttr;
+    }
+
     const hasUrlUtm =
       sp.get('utm_source') ||
       sp.get('utm_medium') ||
@@ -88,22 +110,6 @@ function parseAndPersistAttribution() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.utm_source) return parsed;
-    }
-
-    // Se a pessoa entrou pela página de Link da Bio (/links, /bio, /linktree) sem UTM explícita na URL,
-    // atribui automaticamente os rótulos oficiais do quadro de Funil do Monday para Instagram Bio.
-    const cleanSlug = (window.location.pathname || '').replace(/^\/+|\/+$/g, '').toLowerCase();
-    if (cleanSlug === 'links' || cleanSlug === 'bio' || cleanSlug === 'linktree') {
-      const bioAttr = {
-        utm_source: 'Instagram',
-        utm_medium: 'Organic',
-        utm_campaign: 'Insta Bio',
-        utm_content: 'Instagram_Bio',
-        utm_term: 'Instagram_Bio',
-        ad_click_id: null,
-      };
-      sessionStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(bioAttr));
-      return bioAttr;
     }
   } catch {
     // ignore

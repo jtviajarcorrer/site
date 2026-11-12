@@ -8,7 +8,11 @@ import { startPageAnalytics } from '../utils/analytics.js';
 function ensureBioUtmInUrl() {
   try {
     const sp = new URLSearchParams(window.location.search);
-    if (!sp.get('utm_source')) {
+    const isAutoIgBio =
+      sp.get('utm_content') === 'link_in_bio' ||
+      (sp.get('utm_source') === 'ig' && sp.get('utm_medium') === 'social');
+    const isBioPath = /^\/(links|bio|linktree)\/?$/i.test(window.location.pathname || '');
+    if (!sp.get('utm_source') || isAutoIgBio || isBioPath) {
       sp.set('utm_source', 'Instagram');
       sp.set('utm_medium', 'Organic');
       sp.set('utm_campaign', 'Insta Bio');
