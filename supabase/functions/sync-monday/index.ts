@@ -27,6 +27,7 @@ const COL = {
   destaque: 'boolean_mm4b8z5m',
   fotos: 'file_mm81ydad',
   logoProva: 'file_mm8xk0pr',
+  videoProva: 'link_mm95wage',
   atracoes: 'board_relation_mkmvkhy0',
 };
 // Colunas do quadro Produto
@@ -196,6 +197,97 @@ async function mirrorAsset(sb: Any, assetId: string, folder: string): Promise<st
   return pub.publicUrl;
 }
 
+// Espelha o vídeo da prova (coluna link_mm95wage do quadro Roteiro, geralmente um Reel do Instagram)
+// para o Storage público (.mp4 + capa .jpg), garantindo player limpo na LP sem depender de embed do Instagram.
+async function mirrorRaceVideo(
+  sb: Any,
+  rawUrl: string,
+  folder: string,
+): Promise<{ videoUrl: string | null; posterUrl: string | null }> {
+  const m = rawUrl.match(/instagram\.com\/(?:[^/]+\/)?(?:reel|reels|p)\/([A-Za-z0-9_-]+)/i);
+  if (!m) {
+    return { videoUrl: rawUrl || null, posterUrl: null };
+  }
+  const shortcode = m[1];
+  const mp4Name = `${shortcode}.mp4`;
+  const jpgName = `${shortcode}.jpg`;
+  const mp4Path = `${folder}/${mp4Name}`;
+  const jpgPath = `${folder}/${jpgName}`;
+  const { data: pubMp4 } = sb.storage.from(BUCKET).getPublicUrl(mp4Path);
+  const { data: pubJpg } = sb.storage.from(BUCKET).getPublicUrl(jpgPath);
+
+  const { data: listed } = await sb.storage.from(BUCKET).list(folder, { search: shortcode, limit: 10 });
+  const hasMp4 = listed?.some((f: Any) => f.name === mp4Name);
+  const hasJpg = listed?.some((f: Any) => f.name === jpgName);
+  if (hasMp4) {
+    return { videoUrl: pubMp4.publicUrl, posterUrl: hasJpg ? pubJpg.publicUrl : null };
+  }
+
+  const embedResp = await fetch(`https://www.instagram.com/p/${shortcode}/embed/captioned/`, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Sec-Fetch-Dest': 'iframe',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'cross-site',
+    },
+  });
+  if (!embedResp.ok) throw new Error(`embed Instagram ${shortcode}: HTTP ${embedResp.status}`);
+  const html = await embedResp.text();
+
+  const decodeEscapedUrl = (raw: string) =>
+    raw
+      .replace(/\\+$/g, '')
+      .replace(/\\\\u0025/g, '%')
+      .replace(/\\u0025/g, '%')
+      .replace(/\\\\u0026/g, '&')
+      .replace(/\\u0026/g, '&')
+      .replace(/\\\\\//g, '/')
+      .replace(/\\\//g, '/')
+      .replace(/&amp;/g, '&');
+
+  const vidMatch = html.match(/video_url\\*":\\*"([^"]+)/);
+  const imgMatch =
+    html.match(/display_url\\*":\\*"([^"]+)/) ??
+    html.match(/thumbnail_src\\*":\\*"([^"]+)/) ??
+    html.match(/src\\*":\\*"(https?:[^"]+)\\*",\\*"config_width\\*":(?:1080|750|640|240)/) ??
+    html.match(/class="EmbeddedMediaImage"[^>]+src="([^"]+)"/i);
+
+  if (!vidMatch?.[1]) throw new Error(`Reel ${shortcode} sem video_url no embed`);
+  const mp4Remote = decodeEscapedUrl(vidMatch[1]);
+  const jpgRemote = imgMatch?.[1] ? decodeEscapedUrl(imgMatch[1]) : null;
+
+  const mp4Resp = await fetch(mp4Remote);
+  if (!mp4Resp.ok) throw new Error(`download MP4 ${shortcode}: HTTP ${mp4Resp.status}`);
+  const mp4Buf = await mp4Resp.arrayBuffer();
+  const { error: upErr } = await sb.storage.from(BUCKET).upload(mp4Path, mp4Buf, {
+    contentType: 'video/mp4',
+    upsert: true,
+    cacheControl: '31536000',
+  });
+  if (upErr) throw new Error(`upload ${mp4Path}: ${upErr.message}`);
+
+  let finalPoster: string | null = null;
+  if (jpgRemote) {
+    try {
+      const jpgResp = await fetch(jpgRemote);
+      if (jpgResp.ok) {
+        const jpgBuf = await jpgResp.arrayBuffer();
+        const { error: jpgErr } = await sb.storage.from(BUCKET).upload(jpgPath, jpgBuf, {
+          contentType: 'image/jpeg',
+          upsert: true,
+          cacheControl: '31536000',
+        });
+        if (!jpgErr) finalPoster = pubJpg.publicUrl;
+      }
+    } catch {
+      // ignora erro de poster
+    }
+  }
+
+  return { videoUrl: pubMp4.publicUrl, posterUrl: finalPoster };
+}
+
 // ── Roteiro dia a dia (quadro Itinerário) ────────────────────────────────────────────────
 // Entram só os itens com a coluna "Site" marcada e ligados (coluna "Roteiro") à expedição.
 // Dia/hora vêm da coluna "data" (Hr. Início) — usamos o campo `text`, que já vem no fuso da conta.
@@ -302,6 +394,7 @@ async function syncDays(
   startDate: string,
   roteiroAtrIds: string[],
   raceLogoUrl: string | null,
+  raceVideo: { videoUrl: string | null; posterUrl: string | null; sourceUrl: string | null },
   summary: Any,
   photoCache: Map<string, AtrInfo>,
 ): Promise<number> {
@@ -391,6 +484,24 @@ async function syncDays(
         name: 'Prova de Corrida',
         logo: raceLogoUrl,
         photos: [raceLogoUrl],
+      });
+    }
+  }
+  if (raceVideo.videoUrl || raceVideo.sourceUrl) {
+    if (races.length > 0) {
+      races[0] = {
+        ...races[0],
+        video_url: raceVideo.videoUrl,
+        video_poster: raceVideo.posterUrl,
+        video_source_url: raceVideo.sourceUrl,
+      };
+    } else {
+      races.push({
+        id: `${expeditionId}-race`,
+        name: 'Prova de Corrida',
+        video_url: raceVideo.videoUrl,
+        video_poster: raceVideo.posterUrl,
+        video_source_url: raceVideo.sourceUrl,
       });
     }
   }
@@ -684,8 +795,22 @@ Deno.serve(async (req: Request) => {
               summary.errors.push({ id, name, etapa: 'logo da prova', erro: String((e as Error).message ?? e) });
             }
           }
+          const rawVideoUrl = (parseJson(col(it, COL.videoProva)?.value)?.url ?? '').trim() || text(it, COL.videoProva);
+          let raceVideo: { videoUrl: string | null; posterUrl: string | null; sourceUrl: string | null } = {
+            videoUrl: null,
+            posterUrl: null,
+            sourceUrl: rawVideoUrl || null,
+          };
+          if (rawVideoUrl) {
+            try {
+              const mirrored = await mirrorRaceVideo(sb, rawVideoUrl, `${id}/video`);
+              raceVideo = { ...mirrored, sourceUrl: rawVideoUrl };
+            } catch (e) {
+              summary.errors.push({ id, name, etapa: 'video da prova', erro: String((e as Error).message ?? e) });
+            }
+          }
           const roteiroAtrIds = (col(it, COL.atracoes)?.linked_item_ids ?? []).map(String);
-          const n = await syncDays(sb, id, cron.from, roteiroAtrIds, raceLogoUrl, summary, photoCache);
+          const n = await syncDays(sb, id, cron.from, roteiroAtrIds, raceLogoUrl, raceVideo, summary, photoCache);
           summary.days = (summary.days ?? 0) + n;
         } catch (e) {
           summary.errors.push({ id, name, etapa: 'roteiro', erro: String((e as Error).message ?? e) });

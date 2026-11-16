@@ -456,6 +456,12 @@
     "text": "Site oficial da prova →"
   },
   {
+    "key": "exp_prova_video_rotulo",
+    "group": "Página da Expedição",
+    "where": "Título na barra inferior do card de vídeo da prova",
+    "text": "Vídeo da Prova"
+  },
+  {
     "key": "exp_roteiro_titulo",
     "group": "Página da Expedição",
     "where": "Título da seção",

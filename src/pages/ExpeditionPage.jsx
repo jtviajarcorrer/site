@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import {
@@ -520,24 +520,36 @@ export default function ExpeditionPage({ expedition, navigate }) {
           )}
 
           {/* Prova de Corrida */}
-          {Array.isArray(exp.races) && exp.races.length > 0 && (
-            <section data-analytics-section="prova" className="exp-section" style={{ marginBottom: 56 }}>
-              <SectionTitle>{t('exp_prova_titulo')}</SectionTitle>
+          {Array.isArray(exp.races) && exp.races.length > 0 && (() => {
+            const fbVideo = FALLBACK_RACE_VIDEOS[String(exp.id || exp.monday_item_id || '')];
+            const primaryVideoUrl = exp.races[0]?.video_url || fbVideo?.videoUrl || null;
+            const primaryPosterUrl = exp.races[0]?.video_poster || fbVideo?.posterUrl || null;
+            return (
+              <section data-analytics-section="prova" className="exp-section" style={{ marginBottom: 56 }}>
+                <SectionTitle>{t('exp_prova_titulo')}</SectionTitle>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
-                {exp.races.map((r, i) => (
-                  <div key={r.id || i} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
-                    {(r.logo || r.photos?.[0]) && (
-                      <RaceLogoImage src={r.logo || r.photos[0]} alt={r.name} />
-                    )}
-                    <div style={{ padding: '16px 18px 18px' }}>
-                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>{r.name}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+                  {exp.races.map((r, i) => (
+                    <div key={r.id || i} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
+                      {(r.logo || r.photos?.[0]) && (
+                        <RaceLogoImage src={r.logo || r.photos[0]} alt={r.name} />
+                      )}
+                      <div style={{ padding: '16px 18px 18px' }}>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>{r.name}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+                  ))}
+                  {primaryVideoUrl && (
+                    <RaceVideoCard
+                      videoUrl={primaryVideoUrl}
+                      posterUrl={primaryPosterUrl}
+                      label={t('exp_prova_video_rotulo')}
+                    />
+                  )}
+                </div>
+              </section>
+            );
+          })()}
 
           {/* Itinerary */}
           <section data-analytics-section="roteiro" className="exp-section" style={{ marginBottom: 56 }}>
@@ -888,6 +900,17 @@ export default function ExpeditionPage({ expedition, navigate }) {
 }
 
 /* ─── helpers ─── */
+const FALLBACK_RACE_VIDEOS = {
+  '11039143248': { videoUrl: '/videos/races/DXB_vLmgvi_.mp4', posterUrl: '/videos/races/DXB_vLmgvi_.jpg' },
+  '11921040567': { videoUrl: '/videos/races/DJPhroSymFT.mp4', posterUrl: '/videos/races/DJPhroSymFT.jpg' },
+  '11921017778': { videoUrl: '/videos/races/DcKGEzJP_KR.mp4', posterUrl: '/videos/races/DcKGEzJP_KR.jpg' },
+  '11921040746': { videoUrl: '/videos/races/DKFUdwIN2u8.mp4', posterUrl: '/videos/races/DKFUdwIN2u8.jpg' },
+  '12875174150': { videoUrl: '/videos/races/DcZPqSZvmyE.mp4', posterUrl: '/videos/races/DcZPqSZvmyE.jpg' },
+  '13220769416': { videoUrl: '/videos/races/Dc8sqtgCf2A.mp4', posterUrl: '/videos/races/Dc8sqtgCf2A.jpg' },
+  '13506706137': { videoUrl: '/videos/races/DR9DAH9j3z7.mp4', posterUrl: '/videos/races/DR9DAH9j3z7.jpg' },
+  '13507286252': { videoUrl: '/videos/races/DRpYZZ5jh2u.mp4', posterUrl: '/videos/races/DRpYZZ5jh2u.jpg' },
+};
+
 function RaceLogoImage({ src, alt }) {
   const [invertWhite, setInvertWhite] = useState(false);
 
@@ -946,6 +969,124 @@ function RaceLogoImage({ src, alt }) {
           transition: 'filter 0.2s ease',
         }}
       />
+    </div>
+  );
+}
+
+function RaceVideoCard({ videoUrl, posterUrl, label }) {
+  const videoRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  const handlePlayClick = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    setPlaying(true);
+    v.play().catch(() => {});
+  };
+
+  const posterSrc = posterUrl ? imgUrl(posterUrl, 640) : undefined;
+
+  return (
+    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '4/3',
+          background: '#06111a',
+          borderBottom: `1px solid ${T.border}`,
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {posterSrc && (
+          <img
+            src={posterSrc}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              filter: 'blur(18px) brightness(0.45)',
+              transform: 'scale(1.15)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
+        <video
+          ref={videoRef}
+          src={posterSrc ? videoUrl : `${videoUrl}#t=0.1`}
+          poster={posterSrc}
+          controls={playing}
+          playsInline
+          preload="metadata"
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => setPlaying(false)}
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            display: 'block',
+            background: 'transparent',
+          }}
+        />
+        {!playing && (
+          <button
+            type="button"
+            onClick={handlePlayClick}
+            aria-label={label || 'Vídeo da Prova'}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 2,
+              background: 'rgba(6, 17, 26, 0.22)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+              transition: 'background 0.2s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.35)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.22)'; }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                background: 'rgba(0, 65, 64, 0.92)',
+                border: '2px solid #dab83f',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingLeft: 3,
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#dab83f" stroke="#dab83f" strokeWidth="1.5" strokeLinejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>
+            </div>
+          </button>
+        )}
+      </div>
+      <div style={{ padding: '16px 18px 18px' }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>
+          {label || 'Vídeo da Prova'}
+        </div>
+      </div>
     </div>
   );
 }
