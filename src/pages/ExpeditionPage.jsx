@@ -528,9 +528,9 @@ export default function ExpeditionPage({ expedition, navigate }) {
               <section data-analytics-section="prova" className="exp-section" style={{ marginBottom: 56 }}>
                 <SectionTitle>{t('exp_prova_titulo')}</SectionTitle>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: 16 }}>
                   {exp.races.map((r, i) => (
-                    <div key={r.id || i} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
+                    <div key={r.id || i} style={{ width: 316, maxWidth: '100%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow, display: 'flex', flexDirection: 'column' }}>
                       {(r.logo || r.photos?.[0]) && (
                         <RaceLogoImage src={r.logo || r.photos[0]} alt={r.name} />
                       )}
@@ -943,13 +943,14 @@ function RaceLogoImage({ src, alt }) {
   return (
     <div style={{
       width: '100%',
-      aspectRatio: '4/3',
+      height: 237,
       background: '#fff',
       borderBottom: `1px solid ${T.border}`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px 24px',
+      boxSizing: 'border-box',
     }}>
       <img
         src={imgUrl(src, 640)}
@@ -987,12 +988,12 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
   const posterSrc = posterUrl ? imgUrl(posterUrl, 640) : undefined;
 
   return (
-    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
+    <div style={{ width: 142, flexShrink: 0, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow, display: 'flex', flexDirection: 'column' }}>
       <div
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: '4/3',
+          height: 237,
           background: '#06111a',
           borderBottom: `1px solid ${T.border}`,
           overflow: 'hidden',
@@ -1001,25 +1002,6 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
           justifyContent: 'center',
         }}
       >
-        {posterSrc && (
-          <img
-            src={posterSrc}
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-            decoding="async"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              filter: 'blur(18px) brightness(0.45)',
-              transform: 'scale(1.15)',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
         <video
           ref={videoRef}
           src={posterSrc ? videoUrl : `${videoUrl}#t=0.1`}
@@ -1035,9 +1017,9 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
             zIndex: 1,
             width: '100%',
             height: '100%',
-            objectFit: 'contain',
+            objectFit: 'cover',
             display: 'block',
-            background: 'transparent',
+            background: '#06111a',
           }}
         />
         {!playing && (
@@ -1049,7 +1031,7 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
               position: 'absolute',
               inset: 0,
               zIndex: 2,
-              background: 'rgba(6, 17, 26, 0.22)',
+              background: 'rgba(6, 17, 26, 0.18)',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
@@ -1058,13 +1040,13 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
               padding: 0,
               transition: 'background 0.2s ease',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.35)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.22)'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.32)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.18)'; }}
           >
             <div
               style={{
-                width: 56,
-                height: 56,
+                width: 48,
+                height: 48,
                 borderRadius: '50%',
                 background: 'rgba(0, 65, 64, 0.92)',
                 border: '2px solid #dab83f',
@@ -1075,15 +1057,15 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
                 paddingLeft: 3,
               }}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="#dab83f" stroke="#dab83f" strokeWidth="1.5" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#dab83f" stroke="#dab83f" strokeWidth="1.5" strokeLinejoin="round">
                 <polygon points="6 4 20 12 6 20 6 4" />
               </svg>
             </div>
           </button>
         )}
       </div>
-      <div style={{ padding: '16px 18px 18px' }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>
+      <div style={{ padding: '16px 12px 18px' }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35, whiteSpace: 'nowrap', textAlign: 'center' }}>
           {label || 'Vídeo da Prova'}
         </div>
       </div>
