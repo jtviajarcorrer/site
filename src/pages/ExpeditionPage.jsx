@@ -528,9 +528,9 @@ export default function ExpeditionPage({ expedition, navigate }) {
               <section data-analytics-section="prova" className="exp-section" style={{ marginBottom: 56 }}>
                 <SectionTitle>{t('exp_prova_titulo')}</SectionTitle>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
                   {exp.races.map((r, i) => (
-                    <div key={r.id || i} style={{ width: 316, maxWidth: '100%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow, display: 'flex', flexDirection: 'column' }}>
+                    <div key={r.id || i} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow }}>
                       {(r.logo || r.photos?.[0]) && (
                         <RaceLogoImage src={r.logo || r.photos[0]} alt={r.name} />
                       )}
@@ -943,7 +943,7 @@ function RaceLogoImage({ src, alt }) {
   return (
     <div style={{
       width: '100%',
-      height: 237,
+      aspectRatio: '4/3',
       background: '#fff',
       borderBottom: `1px solid ${T.border}`,
       display: 'flex',
@@ -975,63 +975,85 @@ function RaceLogoImage({ src, alt }) {
 }
 
 function RaceVideoCard({ videoUrl, posterUrl, label }) {
-  const videoRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
-
-  const handlePlayClick = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    setPlaying(true);
-    v.play().catch(() => {});
-  };
-
+  const [modalOpen, setModalOpen] = useState(false);
   const posterSrc = posterUrl ? imgUrl(posterUrl, 640) : undefined;
 
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setModalOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [modalOpen]);
+
   return (
-    <div style={{ width: 142, flexShrink: 0, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: T.shadow, display: 'flex', flexDirection: 'column' }}>
+    <>
       <div
+        onClick={() => setModalOpen(true)}
         style={{
-          position: 'relative',
-          width: '100%',
-          height: 237,
-          background: '#06111a',
-          borderBottom: `1px solid ${T.border}`,
+          background: T.bgCard,
+          border: `1px solid ${T.border}`,
+          borderRadius: 16,
           overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          boxShadow: T.shadow,
+          cursor: 'pointer',
         }}
       >
-        <video
-          ref={videoRef}
-          src={posterSrc ? videoUrl : `${videoUrl}#t=0.1`}
-          poster={posterSrc}
-          controls={playing}
-          playsInline
-          preload="metadata"
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onEnded={() => setPlaying(false)}
+        <div
           style={{
             position: 'relative',
-            zIndex: 1,
             width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
+            aspectRatio: '4/3',
             background: '#06111a',
+            borderBottom: `1px solid ${T.border}`,
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
-        {!playing && (
+        >
+          {posterSrc ? (
+            <img
+              src={posterSrc}
+              alt={label || 'Vídeo da Prova'}
+              loading="lazy"
+              decoding="async"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <video
+              src={`${videoUrl}#t=0.1`}
+              muted
+              playsInline
+              preload="metadata"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          )}
           <button
             type="button"
-            onClick={handlePlayClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalOpen(true);
+            }}
             aria-label={label || 'Vídeo da Prova'}
             style={{
               position: 'absolute',
               inset: 0,
               zIndex: 2,
-              background: 'rgba(6, 17, 26, 0.18)',
+              background: 'rgba(6, 17, 26, 0.22)',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
@@ -1040,13 +1062,13 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
               padding: 0,
               transition: 'background 0.2s ease',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.32)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.18)'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.35)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(6, 17, 26, 0.22)'; }}
           >
             <div
               style={{
-                width: 48,
-                height: 48,
+                width: 56,
+                height: 56,
                 borderRadius: '50%',
                 background: 'rgba(0, 65, 64, 0.92)',
                 border: '2px solid #dab83f',
@@ -1057,19 +1079,91 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
                 paddingLeft: 3,
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#dab83f" stroke="#dab83f" strokeWidth="1.5" strokeLinejoin="round">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#dab83f" stroke="#dab83f" strokeWidth="1.5" strokeLinejoin="round">
                 <polygon points="6 4 20 12 6 20 6 4" />
               </svg>
             </div>
           </button>
-        )}
-      </div>
-      <div style={{ padding: '16px 12px 18px' }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35, whiteSpace: 'nowrap', textAlign: 'center' }}>
-          {label || 'Vídeo da Prova'}
+        </div>
+        <div style={{ padding: '16px 18px 18px' }}>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>
+            {label || 'Vídeo da Prova'}
+          </div>
         </div>
       </div>
-    </div>
+
+      {modalOpen && (
+        <div
+          onClick={() => setModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(6, 17, 26, 0.86)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              height: 'min(84vh, 760px)',
+              aspectRatio: '9/16',
+              maxWidth: '92vw',
+              background: '#06111a',
+              borderRadius: 18,
+              overflow: 'hidden',
+              boxShadow: '0 24px 64px rgba(0, 0, 0, 0.65)',
+              border: '1px solid rgba(218, 184, 63, 0.35)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setModalOpen(false)}
+              aria-label="Fechar vídeo"
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                width: 38,
+                height: 38,
+                borderRadius: '50%',
+                background: 'rgba(6, 17, 26, 0.78)',
+                border: '1.5px solid rgba(255, 255, 255, 0.28)',
+                color: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+              }}
+            >
+              <X size={18} />
+            </button>
+            <video
+              src={videoUrl}
+              poster={posterSrc}
+              controls
+              autoPlay
+              playsInline
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+                background: '#06111a',
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
