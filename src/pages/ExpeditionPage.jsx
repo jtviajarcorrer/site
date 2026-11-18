@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
+import VideoCarousel from '../components/VideoCarousel.jsx';
 import {
-  Calendar, MapPin, CheckCircle, Loader2, ChevronRight,
+  Calendar, MapPin, CheckCircle, Loader2, ChevronLeft, ChevronRight,
   Check, X, Clock, Users, DollarSign, Route, ChevronDown, ChevronUp,
   Star, Shield, Zap, Phone, Mail, MessageCircle
 } from 'lucide-react';
@@ -454,12 +455,13 @@ export default function ExpeditionPage({ expedition, navigate }) {
             </p>
           </section>
 
-          {/* Perfil do grupo (texto fixo) */}
+          {/* Perfil do grupo (texto fixo + carrossel de fotos da Home) */}
           <section data-analytics-section="perfil" className="exp-section" style={{ marginBottom: 56 }}>
             <SectionTitle>{t('exp_perfil_titulo')}</SectionTitle>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: T.textMid, lineHeight: 1.85, margin: 0, whiteSpace: 'pre-wrap' }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: T.textMid, lineHeight: 1.85, margin: '0 0 20px', whiteSpace: 'pre-wrap' }}>
               {t('exp_perfil_texto')}
             </p>
+            <PerfilPhotosCarousel />
           </section>
 
           {/* Includes / Not Includes */}
@@ -715,6 +717,19 @@ export default function ExpeditionPage({ expedition, navigate }) {
         </div>
       </div>
 
+      {/* ── Quem viaja, recomenda (logo após o formulário) ── */}
+      <div className="exp-recomenda-wrap" style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px 56px' }}>
+        <section data-analytics-section="recomenda" className="exp-section" style={{ marginBottom: 0 }}>
+          <SectionTitle>{String(t('recomenda_titulo') || 'Quem viaja, recomenda').replace(/\[\[|\]\]/g, '')}</SectionTitle>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: T.textMid, lineHeight: 1.75, maxWidth: 560, margin: '0 0 24px' }}>
+            {t('recomenda_subtitulo')}
+          </p>
+          <div style={{ maxWidth: 680 }}>
+            <VideoCarousel theme="light" />
+          </div>
+        </section>
+      </div>
+
       {/* ── Barra fixa mobile (atalho rápido para o formulário, oculta quando o formulário já está na tela) ── */}
       {!formVisible && (
         <div className="exp-mobile-cta">
@@ -769,6 +784,9 @@ export default function ExpeditionPage({ expedition, navigate }) {
             grid-template-columns: 1fr !important;
             gap: 32px !important;
             padding: 36px 20px 16px !important;
+          }
+          .exp-recomenda-wrap {
+            padding: 16px 20px 44px !important;
           }
           .exp-sidebar {
             position: static !important;
@@ -1164,6 +1182,191 @@ function RaceVideoCard({ videoUrl, posterUrl, label }) {
         </div>
       )}
     </>
+  );
+}
+
+function PerfilPhotosCarousel() {
+  const { t } = useT();
+  const rawPhotos = t('para_quem_foto') || '/hero.jpg';
+
+  const photos = useMemo(() => {
+    const list = String(rawPhotos)
+      .split(/[\r\n,]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return list.length ? list : ['/hero.jpg'];
+  }, [rawPhotos]);
+
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef(null);
+
+  useEffect(() => {
+    if (idx >= photos.length) setIdx(0);
+  }, [photos.length, idx]);
+
+  useEffect(() => {
+    if (photos.length <= 1 || paused) return;
+    const timer = setInterval(() => {
+      setIdx((prev) => (prev + 1) % photos.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [photos.length, paused]);
+
+  const prev = () => setIdx((i) => (i - 1 + photos.length) % photos.length);
+  const next = () => setIdx((i) => (i + 1) % photos.length);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches?.[0]?.clientX ?? null;
+    setPaused(true);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current !== null) {
+      const endX = e.changedTouches?.[0]?.clientX ?? touchStartX.current;
+      const diff = touchStartX.current - endX;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) next();
+        else prev();
+      }
+    }
+    touchStartX.current = null;
+    setTimeout(() => setPaused(false), 1500);
+  };
+
+  if (!photos.length) return null;
+
+  return (
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '1640 / 924',
+        borderRadius: 16,
+        overflow: 'hidden',
+        boxShadow: T.shadow,
+        background: '#06111a',
+        userSelect: 'none',
+      }}
+    >
+      {photos.map((src, i) => {
+        const active = i === idx;
+        return (
+          <img
+            key={src + i}
+            src={imgUrl(src, 1200)}
+            alt={`Perfil dos viajantes JT ${i + 1}`}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center center',
+              display: 'block',
+              opacity: active ? 1 : 0,
+              transform: active ? 'scale(1)' : 'scale(1.04)',
+              transition: 'opacity 0.9s ease-in-out, transform 3.8s ease-out',
+              pointerEvents: active ? 'auto' : 'none',
+            }}
+          />
+        );
+      })}
+
+      {photos.length > 1 && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 14,
+            right: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            zIndex: 4,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'rgba(6,17,26,0.68)',
+              backdropFilter: 'blur(8px)',
+              padding: '6px 12px',
+              borderRadius: 99,
+              border: '1px solid rgba(255,255,255,0.12)',
+            }}
+          >
+            {photos.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Ir para foto ${i + 1}`}
+                onClick={() => setIdx(i)}
+                style={{
+                  width: i === idx ? 18 : 6,
+                  height: 6,
+                  borderRadius: 99,
+                  border: 'none',
+                  padding: 0,
+                  background: i === idx ? '#dab83f' : 'rgba(241,245,249,0.45)',
+                  transition: 'all 0.25s ease',
+                  cursor: 'pointer',
+                }}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            aria-label="Foto anterior"
+            onClick={prev}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              border: '1px solid rgba(218,184,63,0.45)',
+              background: 'rgba(6,17,26,0.75)',
+              backdropFilter: 'blur(6px)',
+              color: '#dab83f',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          <button
+            type="button"
+            aria-label="Próxima foto"
+            onClick={next}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              border: '1px solid rgba(218,184,63,0.45)',
+              background: 'rgba(6,17,26,0.75)',
+              backdropFilter: 'blur(6px)',
+              color: '#dab83f',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 

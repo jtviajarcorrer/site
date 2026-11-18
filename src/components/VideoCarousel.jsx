@@ -28,7 +28,8 @@ const TESTIMONIAL_VIDEOS = [
   },
 ];
 
-export default function VideoCarousel() {
+export default function VideoCarousel({ theme = 'dark' }) {
+  const isLight = theme === 'light';
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -114,18 +115,18 @@ export default function VideoCarousel() {
                 gap: 8,
                 padding: '6px 12px 6px 8px',
                 borderRadius: 999,
-                background: 'rgba(18,65,92,0.22)',
-                border: '1px solid rgba(218,184,63,0.28)',
+                background: isLight ? '#06111a' : 'rgba(18,65,92,0.22)',
+                border: isLight ? '1px solid rgba(0,65,64,0.25)' : '1px solid rgba(218,184,63,0.28)',
                 textDecoration: 'none',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(218,184,63,0.14)';
+                e.currentTarget.style.background = isLight ? '#0c1f2e' : 'rgba(218,184,63,0.14)';
                 e.currentTarget.style.borderColor = 'rgba(218,184,63,0.55)';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(18,65,92,0.22)';
-                e.currentTarget.style.borderColor = 'rgba(218,184,63,0.28)';
+                e.currentTarget.style.background = isLight ? '#06111a' : 'rgba(18,65,92,0.22)';
+                e.currentTarget.style.borderColor = isLight ? 'rgba(0,65,64,0.25)' : 'rgba(218,184,63,0.28)';
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
@@ -446,7 +447,7 @@ export default function VideoCarousel() {
 
           {/* Traveler Info */}
           <div className="video-info-col" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', flex: '1 1 240px', paddingTop: 38 }}>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: 'rgba(241,245,249,0.8)', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, color: isLight ? '#334d47' : 'rgba(241,245,249,0.8)', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
               {activeVideo.quote}
             </p>
           </div>
