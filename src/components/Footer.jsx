@@ -1,6 +1,6 @@
 import { useT } from '../content/SiteTexts.jsx';
 
-export default function Footer({ navigate }) {
+export default function Footer({ navigate, compact = false }) {
   const { t, rich } = useT();
   const InstagramIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -30,83 +30,68 @@ export default function Footer({ navigate }) {
   };
 
   return (
-    <footer id="contato" data-analytics-section="contato" style={{ borderTop: '1px solid rgba(155,200,169,0.08)', padding: '24px 24px 32px' }}>
+    <footer id="contato" data-analytics-section="contato" style={{ borderTop: '1px solid rgba(155,200,169,0.12)', padding: compact ? '24px 20px 32px' : '24px 24px 32px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
-        {/* Final CTA */}
-        <div className="reveal reveal-zoom" style={{ textAlign: 'center', padding: '64px 24px', background: '#004140', border: '1px solid rgba(155,200,169,0.2)', borderRadius: 28, marginBottom: 60 }}>
-          <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 900, textTransform: 'uppercase', color: '#f1f5f9', lineHeight: 0.95, letterSpacing: '0.02em', margin: '0 0 16px' }}>
-            {rich('rodape_titulo', ['#dab83f'])}
-          </h2>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.7, color: 'rgba(155,200,169,0.85)', maxWidth: 680, margin: '0 auto 36px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <p style={{ margin: 0 }}>
-              {t('rodape_texto_1')}
-            </p>
-            <p style={{ margin: 0 }}>
-              {t('rodape_texto_2')}
-            </p>
+        {/* Final CTA (apenas na Home) */}
+        {!compact && (
+          <div style={{ textAlign: 'center', padding: '56px 24px', background: '#004140', border: '1px solid rgba(155,200,169,0.2)', borderRadius: 28, marginBottom: 48 }}>
+            <h2 style={{ fontFamily: "'Alumni Sans', sans-serif", fontStyle: 'italic', fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 900, textTransform: 'uppercase', color: '#f1f5f9', lineHeight: 0.95, letterSpacing: '0.02em', margin: '0 0 16px' }}>
+              {rich('rodape_titulo', ['#dab83f'])}
+            </h2>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, lineHeight: 1.7, color: 'rgba(155,200,169,0.85)', maxWidth: 680, margin: '0 auto 36px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <p style={{ margin: 0 }}>
+                {t('rodape_texto_1')}
+              </p>
+              <p style={{ margin: 0 }}>
+                {t('rodape_texto_2')}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={goToExpeditions}
+                style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, background: '#dab83f', color: '#06111a', fontFamily: "'Inter', sans-serif", fontWeight: 700, transition: 'opacity 0.2s, transform 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <CompassIcon /> {t('rodape_botao_expedicoes')}
+              </button>
+              <a href="https://wa.me/5531996158950" target="_blank" rel="noopener noreferrer"
+                style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: 'transparent', border: '1.5px solid rgba(155,200,169,0.5)', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontWeight: 600, transition: 'border-color 0.2s, color 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#9bc8a9'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(155,200,169,0.5)'; e.currentTarget.style.color = '#9bc8a9'; }}
+              >
+                <WhatsAppIcon /> {t('rodape_botao_whatsapp')}
+              </a>
+              <a href="https://www.instagram.com/jtviajarcorrer/" target="_blank" rel="noopener noreferrer"
+                style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: 'transparent', border: '1.5px solid rgba(155,200,169,0.5)', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontWeight: 600, transition: 'border-color 0.2s, color 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#9bc8a9'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(155,200,169,0.5)'; e.currentTarget.style.color = '#9bc8a9'; }}
+              >
+                <InstagramIcon /> @jtviajarcorrer
+              </a>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={goToExpeditions}
-              style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, background: '#dab83f', color: '#06111a', fontFamily: "'Inter', sans-serif", fontWeight: 700, transition: 'opacity 0.2s, transform 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <CompassIcon /> {t('rodape_botao_expedicoes')}
-            </button>
-            <a href="https://wa.me/5531996158950" target="_blank" rel="noopener noreferrer"
-              style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: 'transparent', border: '1.5px solid rgba(155,200,169,0.5)', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontWeight: 600, transition: 'border-color 0.2s, color 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#9bc8a9'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(155,200,169,0.5)'; e.currentTarget.style.color = '#9bc8a9'; }}
-            >
-              <WhatsAppIcon /> {t('rodape_botao_whatsapp')}
-            </a>
-            <a href="https://www.instagram.com/jtviajarcorrer/" target="_blank" rel="noopener noreferrer"
-              style={{ padding: '16px 32px', fontSize: 16, borderRadius: 99, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10, background: 'transparent', border: '1.5px solid rgba(155,200,169,0.5)', color: '#9bc8a9', fontFamily: "'Inter', sans-serif", fontWeight: 600, transition: 'border-color 0.2s, color 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#9bc8a9'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(155,200,169,0.5)'; e.currentTarget.style.color = '#9bc8a9'; }}
-            >
-              <InstagramIcon /> @jtviajarcorrer
-            </a>
-          </div>
-        </div>
+        )}
 
-        {/* Bottom */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
-          <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <img src="/logo-jt.png" alt="JT Viajar Correr" style={{ height: 44, width: 'auto', objectFit: 'contain', filter: 'contrast(1.05) brightness(1.1)', opacity: 0.85 }} />
+        {/* Bottom enxuto */}
+        <div className="jt-footer-bottom" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center' }}>
+            <img src="/logo-jt.png" alt="JT Viajar Correr" style={{ height: 36, width: 'auto', objectFit: 'contain', filter: 'contrast(1.05) brightness(1.1)', opacity: 0.85 }} />
           </button>
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center', fontFamily: "'Inter', sans-serif" }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px 14px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
-              <span><strong style={{ fontWeight: 600 }}>Nome:</strong> JT Viajar Correr</span>
-              <span style={{ opacity: 0.4 }}>•</span>
-              <span><strong style={{ fontWeight: 600 }}>CNPJ:</strong> 44.962.794/0001-40</span>
-              <span style={{ opacity: 0.4 }}>•</span>
-              <span>
-                <strong style={{ fontWeight: 600 }}>E-mail:</strong>{' '}
-                <a href="mailto:contato@justtravel.tur.br" style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}>contato@justtravel.tur.br</a>
-              </span>
-              <span style={{ opacity: 0.4 }}>•</span>
-              <span>
-                <strong style={{ fontWeight: 600 }}>Telefone:</strong>{' '}
-                <a href="https://wa.me/5531996158950" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}>+55 31 99615-8950</a>
-              </span>
-            </div>
-            <p style={{ fontSize: 12.5, color: '#64748b', margin: 0 }}>
-              {t('rodape_copyright', { ano: new Date().getFullYear() })}
-            </p>
-          </div>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12.5, color: '#64748b', margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
+            © {new Date().getFullYear()} JT Viajar Correr • CNPJ 44.962.794/0001-40
+          </p>
 
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 10 }}>
             {[
               { href: 'https://www.instagram.com/jtviajarcorrer/', Icon: InstagramIcon, label: 'Instagram', hoverColor: '#dab83f' },
               { href: 'https://wa.me/5531996158950', Icon: WhatsAppIcon, label: 'WhatsApp', hoverColor: '#4ade80' },
             ].map(({ href, Icon, label, hoverColor }) => (
               <a key={href} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
-                style={{ width: 40, height: 40, borderRadius: '50%', background: '#004140', border: '1px solid #004140', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9bc8a9', textDecoration: 'none', transition: 'all 0.2s' }}
+                style={{ width: 38, height: 38, borderRadius: '50%', background: '#004140', border: '1px solid #004140', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9bc8a9', textDecoration: 'none', transition: 'all 0.2s' }}
                 onMouseEnter={e => { e.currentTarget.style.color = hoverColor; e.currentTarget.style.borderColor = hoverColor; }}
                 onMouseLeave={e => { e.currentTarget.style.color = '#9bc8a9'; e.currentTarget.style.borderColor = '#004140'; }}
               >

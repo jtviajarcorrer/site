@@ -865,6 +865,9 @@ export default function ExpeditionPage({ expedition, navigate }) {
           .exp-section {
             margin-bottom: 40px !important;
           }
+          .exp-section:last-child {
+            margin-bottom: 0 !important;
+          }
           .exp-card-pad {
             padding: 18px !important;
           }
@@ -912,7 +915,7 @@ export default function ExpeditionPage({ expedition, navigate }) {
         }
       `}</style>
 
-      <Footer navigate={navigate} />
+      <Footer navigate={navigate} compact />
     </div>
   );
 }
